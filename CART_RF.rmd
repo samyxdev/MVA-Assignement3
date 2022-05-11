@@ -78,6 +78,11 @@ Ionosphere.tree.train = rpart(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7
 ```{r}
 fancyRpartPlot(Ionosphere.tree.train, main="Default parameter run")
 ```
+```{r}
+Ionosphere.tree.train
+```
+
+
 Let's describe the obtained classification tree. We got 5 splits and 6 leaves.
 Although having 34 variables to predict the "class" variable, only 5 (V5, V27, V8, V22 and V3) are selected for this classification tree.
 
@@ -111,7 +116,6 @@ Before moving forward to the random forest, could we improve our classification 
 
 ```{r}
 plotcp(Ionosphere.tree.train, main="Error related to CP values")
-png(file="cp.png")
 ```
 
 To so, we'll acquire the complexity parameter (CP) leading to the lowest error:
@@ -138,17 +142,20 @@ Which are both better than before.
 ### Default parameters
 Now we will compute a random forest in the hope for a better accuracy score, using the `randomForest` library:
 ```{r}
-rf = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=1000, mtry=10)
+rf = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train)
 print(rf)
 ```
-
-We changed the default number of tree parameters to 1000 instead of 500.
+### Tree numbers
 ```{r}
 plot(rf, main="Random forest")
-png(file="rf.png")
 ```
 
-We can see that our error rates are reaching a stationary state after ~800 trees.
+We can see that our error rates seems lower around 130. We will generate a new Random Forest model:
+```{r}
+rf = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=130)
+plot(rf)
+```
+
 
 We then use this first Random Forest to predict the test data:
 ```{r}
@@ -172,7 +179,6 @@ oob_per_mtry <- function(mtry){
 mtry_vals = c(1:34)
 oob_vals = lapply(mtry_vals, oob_per_mtry)
 plot(mtry_vals, oob_vals)
-png("oob_mtry.png")
 ```
 
 On the above plot we can see that the OOB error seems to be reaching a global minimum around 7 variables. However, we have to take into consideration that those result we obtained one set of train/test split and parameters may differ for different simulations.
@@ -196,7 +202,7 @@ Ionosphere$P1 = (Ionosphere$V3)**2 + (Ionosphere$V4)**2
 ```
 
 
-
+TODO : even partitions with createDataPartitions from caret
 
 
 TODO : add a norm variable + which are complex and real values ?

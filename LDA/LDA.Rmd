@@ -1,0 +1,324 @@
+---
+title: "Linear Discriminant Analysis and extensions"
+author: "Denaldo Lapi, Francesco Aristei and Samy Chouiti"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+#output: pdf_document 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Delete eventual R objects in memory.
+```{r, include=TRUE}
+rm(list = ls())
+```
+
+At first, let's load the libraries we'll need. 
+The package *MASS* runs the LDA, *dplyr* and *ggplot2* will help us with data manipulation and graphs, and *kableExtra* will help us to print beautiful tables.
+```{r message=FALSE,warning=FALSE}
+library(MASS)
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+```
+
+
+### Exploratory data analysis
+
+
+The dataset we are going to analyze is 'phoneme.csv'.
+The data set contains samples of digitized speech for five phonemes: aa (as the vowel 
+in dark), ao (as the first vowel in water), dcl (as in dark), iy (as the vowel in she), and sh (as in she). 
+In total, 4509 speech frames of 32 msec were selected. For each speech frame, a log-periodogram 
+of length 256 was computed, on whose basis we want to perform speech recognition. 
+The 256 
+columns labeled x.1 to x.256 identify the speech features, while the 
+columns g and speaker indicate the phonemes (labels) and speakers, respectively. Use only the 
+first 10 columns, i.e., from x.1 to x.10, and the labels (column g)
+
+
+Let's now load the data from the csv file.
+```{r, include=TRUE}
+all_data <- read.csv("phoneme.csv", header = TRUE)
+```
+
+
+Check the dimension:
+```{r}
+dim(all_data)
+```
+We have 259 columns, since the 1st one is the row index.
+
+
+We'll need to use only the columns from x.1 to x.10 and the g column:
+```{r}
+data <- all_data[, c(2:11, 258)]
+```
+
+Let's check again the dimension:
+```{r}
+dim(data)
+```
+
+We can check the structure:
+```{r}
+str(data)
+```
+The 10 numerical variables are read by R as numeric, while the class variable is read as a character. 
+Let's transform it into a factor, by using the 'purrr' package:
+
+```{r}
+library(purrr)
+data %>% modify_if(is.character, as.factor) -> data
+```
+
+Let's now check again the structure:
+```{r}
+str(data)
+```
+The 'g' variable has correctly been converted into the R factor type.
+Now, all the variables are well defined, and we don't have to do any further change to the variable type.
+
+Let's check the distribution of the samples along the 5 classes:
+```{r}
+table(Phonemes=data$g) %>% 
+kbl(caption = "Frequency table. Phoneme data set") %>%
+kable_classic(full_width = F, html_font = "Cambria")
+```
+
+We can print a portion (a sample of 20) of the table using kable and the pipe operator:
+```{r}
+data %>%
+  sample_n(., 20, replace=FALSE) %>% 
+  arrange(g) %>% 
+  kbl(caption = "Phoneme data set (sample of 20)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+Let's now visualize some basic statistics on each of the data frame's columns with _summary_:
+```{r}
+data %>% 
+  summary(.) %>% 
+  kbl(caption = "Basic statistics. Phoneme data set") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+Let's get a rough estimate of the distribution of the values for each attribute broken down by each class, since we have labels for each class.
+
+
+```{r}
+library(gridExtra)
+g1 <- ggplot(data,aes(x=g, y=x.1, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g2 <- ggplot(data,aes(x=g, y=x.2, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g3 <- ggplot(data,aes(x=g, y=x.3, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g4 <- ggplot(data,aes(x=g, y=x.4, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g5 <- ggplot(data,aes(x=g, y=x.5, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g6 <- ggplot(data,aes(x=g, y=x.6, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g7 <- ggplot(data,aes(x=g, y=x.7, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g8 <- ggplot(data,aes(x=g, y=x.8, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g9 <- ggplot(data,aes(x=g, y=x.9, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+g10 <- ggplot(data,aes(x=g, y=x.10, fill=g)) + 
+    geom_boxplot() +
+    theme(legend.position="none")
+grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10, nrow=5)
+```
+
+Histograms (or their densities) could be also very useful:
+```{r}
+g1 <- ggplot(data, aes(x = x.1, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g2 <- ggplot(data, aes(x = x.2, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g3 <- ggplot(data, aes(x = x.3, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g4 <- ggplot(data, aes(x = x.4, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g5 <- ggplot(data, aes(x = x.5, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g6 <- ggplot(data, aes(x = x.6, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g7 <- ggplot(data, aes(x = x.7, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g8 <- ggplot(data, aes(x = x.8, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g9 <- ggplot(data, aes(x = x.9, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position="none")
+g10 <- ggplot(data, aes(x = x.10, fill = g)) +
+  geom_density(alpha = 0.7) + theme_bw() +
+    theme(legend.position = c(0.7, 0.7))
+grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,nrow=5)
+```
+
+We can see differences among the 5 classes, e.g. it seems that sh is the phoneme with the lowest values of the features, except for x.1, x.2 and x.10 
+
+Note: Here, we skip that part of contextualize the results for the sake of saving time. You must comment about the results of EDA in In the Exercises and Final Project.
+
+Let's check the correlation between numerical variables:
+```{r}
+library(GGally)
+ggpairs(data, columns = 1:10, 
+        ggplot2::aes(colour=g),
+        title="Correlation matrix. Phoneme data")
+```
+We can see that they are pretty correlated.
+
+### Preparing the dataset
+
+#### Scaling
+
+Discriminant analysis *is not affected* by the scale/unit in which predictor variables are measured, but we can standardize the variables to make their scale comparable. In any case (variables standardized or not), the LDA will give the same results. 
+
+Typically it is suggested to always normalize:
+```{r}
+data_sc <- data %>%
+        mutate_if(is.numeric, scale)
+```
+
+We can print a sample of the scaled table to see the new units:
+```{r}
+data_sc %>%
+  sample_n(., 20, replace=FALSE) %>% 
+  arrange(g) %>% 
+  kbl(caption = "Fisher's iris data set (sample of 20)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+Let's print again the basic statistics:
+```{r}
+data_sc %>% 
+  summary(.) %>% 
+  kbl(caption = "Basic statistics. Phoneme data set") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+As we can see, we have now zero mean.
+
+
+#### Split the data
+Let's first split the data into training set (80%) and test set (20%):
+```{r}
+library(caret)
+set.seed(7)
+training.samples <- data_sc$g %>% # return the indexes of the rows
+      createDataPartition(p = 0.8, list = FALSE)
+
+train.data <- data_sc[training.samples, ]
+test.data <- data_sc[-training.samples, ]
+paste0("Proportion of training is ", round((nrow(train.data)/nrow(data_sc))*100,2),"%")
+paste0("Proportion of training is ", round((nrow(test.data)/nrow(data_sc))*100,2),"%")
+```
+### Running LDA
+
+The LDA method starts by finding directions that maximize the separation between classes, then it uses these directions to
+predict the class of individuals. 
+
+These directions, called discriminant function (DF or linear discriminants), are a linear combinations of predictor variables.
+
+LDA assumes that predictors (i.e. the features) are normally distributed (Gaussian distribution) and that the different classes have class-specific means and equal variance/covariance (i.e. spread; pay attention: this does not always happen.
+
+Therefore, before performing LDA, consider:
+
+* Inspecting the univariate distributions of each variable and make sure that they are normally distributed. 
+  + If not, you can transform them using log and root for exponential distributions and Box-Cox for skewed distributions.
+
+* Removing outliers from your data 
+* Standardize the variables to make their scale comparable.
+
+The linear discriminant analysis can be easily computed using the function _lda_ (MASS package), using the training data subset.
+```{r}
+(model <- lda(g~., data = train.data))
+```
+```{r}
+plot(model)
+```
+
+
+```{r}
+## get the x,y coordinates for the LDA plot  ----> i.e. to obtain the new LD coordinates
+data.lda.values <- predict(model)
+ 
+## create a dataframe that has all the info we need to draw a graph
+plot.data <- data.frame(X=data.lda.values$x[,1], 
+                        Y=data.lda.values$x[,2],
+                        Phonemes=train.data$g)
+head(plot.data)
+## draw a graph using ggplot2
+ggplot(data=plot.data, aes(x=X, y=Y)) +
+    geom_point(aes(color=Phonemes)) +
+    xlab("LD1") + ylab("LD2") +
+    theme_bw()
+```
+### Predictions
+```{r}
+predictions <- model %>% predict(test.data)
+names(predictions)
+```
+The _predict_ function returns the following elements:
+
+* _class_: predicted classes of observations.
+* _posterior_: is a matrix whose columns are the groups, rows are the individuals and values are the posterior probability
+that the corresponding observation belongs to the groups.
+* _x_: contains the linear discriminants (DF), described above
+
+Inspect the results:
+```{r}
+# Predicted classes:
+head(predictions$class, 6)
+# Predicted probabilities of class membership.
+predictions$posterior[sample(1:nrow(predictions$posterior), 10, replace=FALSE),] %>% 
+  kbl(caption = "Predicted probabilities of class membership (sample of 10)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+# Linear discriminants
+head(predictions$x, 3)
+```
+### Model accuracy
+
+We can compute model accuracy in this wa
+```{r}
+mean(predictions$class==test.data$g)
+```
+It can be seen that, our model correctly classified `r paste0(round(mean(predictions$class==test.data$g)*100,2),"%")` of observations, which is a quite good result.
+
+### Running QDA
+It assumes that the spread/variance in each variable is different
+```{r}
+library(MASS)
+#Fit the model
+(modelqda <- qda(g ~ ., data = train.data))
+# Make predictions
+predictionsqda <- modelqda %>% predict(test.data)
+# Model accuracy
+mean(predictionsqda$class == test.data$g)
+```
+QDA model correctly classified `r paste0(round(mean(predictionsqda$class == test.data$g)*100,2),"%")` of observations, which is excellent (the same value as before. Small data set).
+
+
+
+

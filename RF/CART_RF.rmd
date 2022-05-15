@@ -1,11 +1,12 @@
 ---
 title: "CART_RF"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 # CART & Random Forest
 ```{r}
-install.packages("yardstick")
 set.seed(67)
 ```
 
@@ -28,13 +29,6 @@ summary(Ionosphere)
 Based on the "V" variables predictors representing values of the measured electromagnetic field (with both real and complex components), we'll build a classification and then a Random Forest model in order to predict the *Class* variable about whether a measure is "good" or "bad" (refer to the above description for an interpretation of those categories).
 
 From the initial exploration, we can see that the dataset contains almost twice observations having "class"=good as observation having "class"=bad. Therefore, we'll have to be careful of this characteristic When drawing conclusions about our models.
-
-```{r}
-myblue <- rgb(0, 0, 255, max = 255, alpha = 125, names = "blue50")
-myred <- rgb(255, 0, 0, max = 255, alpha = 125, names = "red50")
-hist(Ionosphere$V3, col=myblue, alpha=125)
-hist(Ionosphere$V4, col=myred, alpha=125, add=TRUE)
-```
 
 
 ## Dataset preparation

@@ -1,0 +1,1503 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Linear Discriminant Analysis and extensions},
+  pdfauthor={Denaldo Lapi, Francesco Aristei and Samy Chouiti},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Linear Discriminant Analysis and extensions}
+\author{Denaldo Lapi, Francesco Aristei and Samy Chouiti}
+\date{13 May 2022}
+
+\begin{document}
+\maketitle
+
+Delete eventual R objects in memory.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{rm}\NormalTok{(}\AttributeTok{list =} \FunctionTok{ls}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+At first, let's load the libraries we'll need. The package \emph{MASS}
+runs the LDA, \emph{dplyr} and \emph{ggplot2} will help us with data
+manipulation and graphs, and \emph{kableExtra} will help us to print
+beautiful tables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(MASS)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(kableExtra)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{exploratory-data-analysis}{%
+\subsubsection{Exploratory data
+analysis}\label{exploratory-data-analysis}}
+
+The dataset we are going to analyze is `phoneme.csv'. The data set
+contains samples of digitized speech for five phonemes: aa (as the vowel
+in dark), ao (as the first vowel in water), dcl (as in dark), iy (as the
+vowel in she), and sh (as in she). In total, 4509 speech frames of 32
+msec were selected. For each speech frame, a log-periodogram of length
+256 was computed, on whose basis we want to perform speech recognition.
+The 256 columns labeled x.1 to x.256 identify the speech features, while
+the columns g and speaker indicate the phonemes (labels) and speakers,
+respectively. Use only the first 10 columns, i.e., from x.1 to x.10, and
+the labels (column g)
+
+Let's now load the data from the csv file.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{all\_data }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"phoneme.csv"}\NormalTok{, }\AttributeTok{header =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Check the dimension:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(all\_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4509  259
+\end{verbatim}
+
+We have 259 columns, since the 1st one is the row index.
+
+We'll need to use only the columns from x.1 to x.10 and the g column:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data }\OtherTok{\textless{}{-}}\NormalTok{ all\_data[, }\FunctionTok{c}\NormalTok{(}\DecValTok{2}\SpecialCharTok{:}\DecValTok{11}\NormalTok{, }\DecValTok{258}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
+Let's check again the dimension:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4509   11
+\end{verbatim}
+
+We can check the structure:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    4509 obs. of  11 variables:
+##  $ x.1 : num  9.86 13.23 10.82 10.54 12.97 ...
+##  $ x.2 : num  9.21 14.19 9.08 9.12 13.69 ...
+##  $ x.3 : num  9.82 15.34 9.78 10.85 14.91 ...
+##  $ x.4 : num  9.02 18.12 12.2 13.92 18.22 ...
+##  $ x.5 : num  9.06 19.54 12.59 13.52 18.45 ...
+##  $ x.6 : num  8.93 18.33 10.53 10.28 17.26 ...
+##  $ x.7 : num  11.28 17.34 8.55 8.97 17.8 ...
+##  $ x.8 : num  11.53 17.17 9.46 11.57 17.76 ...
+##  $ x.9 : num  10.8 19.6 12 12.4 19 ...
+##  $ x.10: num  9.05 20.15 12.05 10.48 17.4 ...
+##  $ g   : chr  "sh" "iy" "dcl" "dcl" ...
+\end{verbatim}
+
+The 10 numerical variables are read by R as numeric, while the class
+variable is read as a character. Let's transform it into a factor, by
+using the `purrr' package:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(purrr)}
+\NormalTok{data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{modify\_if}\NormalTok{(is.character, as.factor) }\OtherTok{{-}\textgreater{}}\NormalTok{ data}
+\end{Highlighting}
+\end{Shaded}
+
+Let's now check again the structure:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    4509 obs. of  11 variables:
+##  $ x.1 : num  9.86 13.23 10.82 10.54 12.97 ...
+##  $ x.2 : num  9.21 14.19 9.08 9.12 13.69 ...
+##  $ x.3 : num  9.82 15.34 9.78 10.85 14.91 ...
+##  $ x.4 : num  9.02 18.12 12.2 13.92 18.22 ...
+##  $ x.5 : num  9.06 19.54 12.59 13.52 18.45 ...
+##  $ x.6 : num  8.93 18.33 10.53 10.28 17.26 ...
+##  $ x.7 : num  11.28 17.34 8.55 8.97 17.8 ...
+##  $ x.8 : num  11.53 17.17 9.46 11.57 17.76 ...
+##  $ x.9 : num  10.8 19.6 12 12.4 19 ...
+##  $ x.10: num  9.05 20.15 12.05 10.48 17.4 ...
+##  $ g   : Factor w/ 5 levels "aa","ao","dcl",..: 5 4 3 3 1 4 1 5 2 2 ...
+\end{verbatim}
+
+The `g' variable has correctly been converted into the R factor type.
+Now, all the variables are well defined, and we don't have to do any
+further change to the variable type.
+
+Let's check the distribution of the samples along the 5 classes:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{table}\NormalTok{(}\AttributeTok{Phonemes=}\NormalTok{data}\SpecialCharTok{$}\NormalTok{g) }\SpecialCharTok{\%\textgreater{}\%} 
+\FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Frequency table. Phoneme data set"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-10}Frequency table. Phoneme data set}
+\centering
+\begin{tabular}[t]{l|r}
+\hline
+Phonemes & Freq\\
+\hline
+aa & 695\\
+\hline
+ao & 1022\\
+\hline
+dcl & 757\\
+\hline
+iy & 1163\\
+\hline
+sh & 872\\
+\hline
+\end{tabular}
+\end{table}
+
+We can print a portion (a sample of 20) of the table using kable and the
+pipe operator:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{sample\_n}\NormalTok{(., }\DecValTok{20}\NormalTok{, }\AttributeTok{replace=}\ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{arrange}\NormalTok{(g) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Phoneme data set (sample of 20)"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-11}Phoneme data set (sample of 20)}
+\centering
+\begin{tabular}[t]{r|r|r|r|r|r|r|r|r|r|l}
+\hline
+x.1 & x.2 & x.3 & x.4 & x.5 & x.6 & x.7 & x.8 & x.9 & x.10 & g\\
+\hline
+7.73205 & 14.09933 & 17.41304 & 16.66522 & 13.43860 & 18.87197 & 19.23354 & 15.92752 & 17.96598 & 19.39180 & aa\\
+\hline
+10.12058 & 13.13632 & 17.80103 & 18.12037 & 15.83275 & 17.20339 & 19.75021 & 18.71342 & 16.51108 & 19.08892 & aa\\
+\hline
+12.83099 & 14.97235 & 18.46306 & 18.16856 & 14.22795 & 19.16619 & 20.25815 & 18.17891 & 17.12534 & 19.59715 & aa\\
+\hline
+10.57430 & 15.33342 & 17.50268 & 16.53945 & 15.13355 & 18.14305 & 17.57551 & 14.33241 & 18.12345 & 18.04252 & aa\\
+\hline
+10.16582 & 9.99853 & 17.54308 & 19.12951 & 17.33875 & 9.91038 & 19.33311 & 20.84697 & 19.01259 & 11.54106 & aa\\
+\hline
+12.67100 & 11.85300 & 16.20593 & 17.86736 & 15.62206 & 15.10794 & 17.54062 & 19.10409 & 16.44334 & 16.46053 & aa\\
+\hline
+7.42249 & 12.09027 & 17.45104 & 18.39287 & 15.71535 & 15.14548 & 19.30217 & 19.43129 & 16.00835 & 15.32168 & aa\\
+\hline
+10.30878 & 13.56834 & 17.69343 & 18.05923 & 14.93586 & 17.43647 & 19.89765 & 18.93300 & 15.03628 & 18.45617 & ao\\
+\hline
+10.63495 & 9.66110 & 13.95919 & 16.32105 & 15.48894 & 12.42716 & 14.55918 & 17.48336 & 16.80485 & 13.72867 & dcl\\
+\hline
+9.12409 & 11.89616 & 14.29028 & 13.26300 & 13.50257 & 16.23683 & 15.43918 & 12.00661 & 15.44634 & 15.17150 & dcl\\
+\hline
+9.28674 & 9.67149 & 12.16824 & 13.43705 & 12.81834 & 10.23471 & 14.50841 & 14.41578 & 11.45789 & 10.00169 & dcl\\
+\hline
+9.57097 & 13.38072 & 17.98860 & 18.82125 & 16.07869 & 17.60221 & 20.97979 & 20.85467 & 16.39950 & 18.65358 & iy\\
+\hline
+12.89146 & 12.25752 & 15.95519 & 18.97660 & 17.92595 & 11.81831 & 17.68590 & 21.40815 & 21.57955 & 18.03848 & iy\\
+\hline
+12.71390 & 12.42490 & 17.04503 & 17.92561 & 15.56244 & 16.22937 & 20.40175 & 20.52948 & 16.94663 & 19.04638 & iy\\
+\hline
+10.94526 & 8.11086 & 11.94533 & 17.90919 & 19.82964 & 18.37805 & 15.86965 & 16.28083 & 19.56611 & 21.90655 & iy\\
+\hline
+12.29299 & 12.58323 & 16.23263 & 17.40237 & 14.12017 & 15.74289 & 19.80149 & 19.92032 & 16.42791 & 17.74722 & iy\\
+\hline
+11.15128 & 12.40824 & 12.82887 & 13.05075 & 10.07896 & 12.63637 & 13.16881 & 12.98339 & 13.01246 & 12.31957 & sh\\
+\hline
+11.43303 & 8.91929 & 10.72062 & 12.10770 & 13.16317 & 13.58743 & 12.49109 & 13.53478 & 10.92854 & 12.19124 & sh\\
+\hline
+10.80998 & 10.66035 & 11.16265 & 11.75361 & 10.20989 & 12.44917 & 11.78547 & 12.19872 & 12.81455 & 13.20219 & sh\\
+\hline
+11.38247 & 6.51440 & 7.96861 & 8.20367 & 9.83192 & 11.35800 & 11.54539 & 9.12620 & 10.45285 & 10.99533 & sh\\
+\hline
+\end{tabular}
+\end{table}
+
+Let's now visualize some basic statistics on each of the data frame's
+columns with \emph{summary}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{summary}\NormalTok{(.) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Basic statistics. Phoneme data set"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-12}Basic statistics. Phoneme data set}
+\centering
+\begin{tabular}[t]{l|l|l|l|l|l|l|l|l|l|l|l}
+\hline
+  &      x.1 &      x.2 &      x.3 &      x.4 &      x.5 &      x.6 &      x.7 &      x.8 &      x.9 &      x.10 &   g\\
+\hline
+ & Min.   : 1.764 & Min.   : 1.794 & Min.   : 0.00562 & Min.   : 2.552 & Min.   : 2.965 & Min.   : 0.8793 & Min.   : 4.148 & Min.   : 4.562 & Min.   : 4.80 & Min.   : 2.731 & aa : 695\\
+\hline
+ & 1st Qu.: 9.629 & 1st Qu.:10.086 & 1st Qu.:12.64430 & 1st Qu.:13.564 & 1st Qu.:12.887 & 1st Qu.:12.4878 & 1st Qu.:13.279 & 1st Qu.:13.621 & 1st Qu.:13.43 & 1st Qu.:13.062 & ao :1022\\
+\hline
+ & Median :10.830 & Median :11.811 & Median :15.47112 & Median :16.640 & Median :15.221 & Median :14.9470 & Median :16.382 & Median :16.762 & Median :16.30 & Median :16.206 & dcl: 757\\
+\hline
+ & Mean   :10.791 & Mean   :11.814 & Mean   :14.70920 & Mean   :15.756 & Mean   :15.075 & Mean   :14.9188 & Mean   :15.912 & Mean   :16.353 & Mean   :16.11 & Mean   :15.953 & iy :1163\\
+\hline
+ & 3rd Qu.:12.019 & 3rd Qu.:13.628 & 3rd Qu.:17.16082 & 3rd Qu.:18.209 & 3rd Qu.:17.409 & 3rd Qu.:17.6435 & 3rd Qu.:18.842 & 3rd Qu.:19.259 & 3rd Qu.:18.87 & 3rd Qu.:18.866 & sh : 872\\
+\hline
+ & Max.   :16.264 & Max.   :18.221 & Max.   :20.49321 & Max.   :21.787 & Max.   :21.906 & Max.   :22.9366 & Max.   :22.941 & Max.   :24.111 & Max.   :23.94 & Max.   :24.702 & NA\\
+\hline
+\end{tabular}
+\end{table}
+
+\hypertarget{check-for-missing-values}{%
+\paragraph{Check for missing values}\label{check-for-missing-values}}
+
+Let's check for NA values:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{colSums}\NormalTok{((}\FunctionTok{is.na}\NormalTok{((data))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  x.1  x.2  x.3  x.4  x.5  x.6  x.7  x.8  x.9 x.10    g 
+##    0    0    0    0    0    0    0    0    0    0    0
+\end{verbatim}
+
+There are no missing values!
+
+\hypertarget{outliers}{%
+\paragraph{Outliers}\label{outliers}}
+
+One way to check for multivariate outliers is with {[}``Mahalanobis'''
+distance{]} (\url{https://en.wikipedia.org/wiki/Mahalanobis_distance}).
+``Mahalanobis''' distance can be thought of as a metric for estimating
+how far each case is from the center of all the variables' distributions
+(i.e.~the centroid in multivariate space). We'll use the
+``chemometrics'' package, which contains a function (`Moutlier') for
+calculating and plotting both the Mahalanobis' distance and a robust
+version of the Mahalanobis' distance.
+
+At first, let's calculate the Mahalanobis' distances using the Moutlier
+function of the chemometrics package, to which we provide as parameters
+the numeric data frame, the quantile cutoff point beyond which you want
+to identify points as outliers, and whether or not you want a plot:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#install.packages("chemometrics")}
+\FunctionTok{library}\NormalTok{(chemometrics)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'chemometrics' was built under R version 4.1.3
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: rpart
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{md }\OtherTok{\textless{}{-}} \FunctionTok{Moutlier}\NormalTok{(data[, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{], }\AttributeTok{quantile =} \FloatTok{0.99}\NormalTok{, }\AttributeTok{plot=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The function returns the cutoff value for the outliers:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{md}\SpecialCharTok{$}\NormalTok{cutoff}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4.817598
+\end{verbatim}
+
+Use the `which' function to identify which cases are outliers according
+to the `cutoff' values provided by the Moutlier function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{outliers }\OtherTok{\textless{}{-}} \FunctionTok{which}\NormalTok{(md}\SpecialCharTok{$}\NormalTok{md }\SpecialCharTok{\textgreater{}}\NormalTok{ md}\SpecialCharTok{$}\NormalTok{cutoff)}
+\NormalTok{outliers}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   [1]  143  150  153  155  157  169  172  173  175  195  227  232  236  239  265
+##  [16]  267  269  276  280  287  296  299  303  308  322  375  380  391  434  466
+##  [31]  469  470  471  473  564  603  615  647  648  653  659  670  739  741  744
+##  [46]  775  776  827  829  889  917  945 1019 1021 1022 1023 1050 1113 1149 1165
+##  [61] 1181 1186 1241 1244 1245 1331 1336 1371 1375 1390 1434 1498 1500 1572 1575
+##  [76] 1576 1577 1592 1615 1616 1618 1619 1658 1679 1690 1734 1788 1799 1804 1814
+##  [91] 1870 1875 1920 1924 1933 1962 1966 1971 1973 2035 2045 2056 2071 2106 2107
+## [106] 2127 2141 2163 2174 2187 2196 2197 2200 2223 2227 2263 2304 2307 2329 2331
+## [121] 2333 2365 2412 2425 2478 2486 2488 2492 2537 2558 2562 2563 2615 2641 2735
+## [136] 2763 2834 2863 2869 2871 2895 2960 2983 2995 3086 3096 3101 3121 3146 3158
+## [151] 3162 3204 3206 3211 3265 3275 3371 3388 3393 3412 3449 3450 3451 3452 3453
+## [166] 3454 3455 3456 3461 3465 3473 3483 3486 3487 3488 3565 3622 3678 3711 3715
+## [181] 3722 3731 3743 3765 3831 3847 3861 3913 3921 3922 3932 3966 3981 4011 4040
+## [196] 4096 4112 4116 4117 4128 4147 4175 4197 4206 4228 4240 4288 4337 4353 4372
+## [211] 4391 4397 4466 4503
+\end{verbatim}
+
+We have now the indices of the found outliers, we will simply remove
+them from the dataset, considering that we have more thant 4k
+observations:
+
+Let's get a rough estimate of the distribution of the values for each
+attribute broken down by each class, since we have labels for each
+class.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(gridExtra)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'gridExtra'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     combine
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.1}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.2}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g3 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.3}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g4 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.4}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g5 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.5}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g6 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.6}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g7 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.7}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g8 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.8}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g9 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.9}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g10 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data,}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{g, }\AttributeTok{y=}\NormalTok{x}\FloatTok{.10}\NormalTok{, }\AttributeTok{fill=}\NormalTok{g)) }\SpecialCharTok{+} 
+    \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\FunctionTok{grid.arrange}\NormalTok{(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10, }\AttributeTok{nrow=}\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-18-1.pdf}
+
+Histograms (or their densities) could be also very useful:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.1}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.2}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g3 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.3}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g4 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.4}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g5 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.5}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g6 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.6}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g7 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.7}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g8 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.8}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g9 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.9}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position=}\StringTok{"none"}\NormalTok{)}
+\NormalTok{g10 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x}\FloatTok{.10}\NormalTok{, }\AttributeTok{fill =}\NormalTok{ g)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.7}\NormalTok{, }\FloatTok{0.7}\NormalTok{))}
+\CommentTok{\#grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,nrow=5)}
+\FunctionTok{grid.arrange}\NormalTok{(g1,g2,}\AttributeTok{nrow=}\DecValTok{1}\NormalTok{); }\FunctionTok{grid.arrange}\NormalTok{(g3,g4,}\AttributeTok{nrow=}\DecValTok{1}\NormalTok{);}\FunctionTok{grid.arrange}\NormalTok{(g5,g6,}\AttributeTok{nrow=}\DecValTok{1}\NormalTok{); }\FunctionTok{grid.arrange}\NormalTok{(g7,g8,}\AttributeTok{nrow=}\DecValTok{1}\NormalTok{); }\FunctionTok{grid.arrange}\NormalTok{(g9,g10,}\AttributeTok{nrow=}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-19-1.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-19-2.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-19-3.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-19-4.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-19-5.pdf}
+
+We can see differences among the 5 classes, e.g.~it seems that sh is the
+phoneme with the lowest values of the features, except for x.1, x.2 and
+x.10
+
+Note: Here, we skip that part of contextualize the results for the sake
+of saving time. You must comment about the results of EDA in In the
+Exercises and Final Project.
+
+Let's check the correlation between numerical variables:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(GGally)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'GGally':
+##   method from   
+##   +.gg   ggplot2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggpairs}\NormalTok{(data, }\AttributeTok{columns =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }
+\NormalTok{        ggplot2}\SpecialCharTok{::}\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour=}\NormalTok{g),}
+        \AttributeTok{title=}\StringTok{"Correlation matrix. Phoneme data"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-20-1.pdf} We can
+see that they are pretty correlated.
+
+\hypertarget{preparing-the-dataset}{%
+\subsubsection{Preparing the dataset}\label{preparing-the-dataset}}
+
+\hypertarget{scaling}{%
+\paragraph{Scaling}\label{scaling}}
+
+Discriminant analysis \emph{is not affected} by the scale/unit in which
+predictor variables are measured, but we can standardize the variables
+to make their scale comparable. In any case (variables standardized or
+not), the LDA will give the same results.
+
+Typically it is suggested to always normalize:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_sc }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{mutate\_if}\NormalTok{(is.numeric, scale)}
+\end{Highlighting}
+\end{Shaded}
+
+We can print a sample of the scaled table to see the new units:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_sc }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{sample\_n}\NormalTok{(., }\DecValTok{20}\NormalTok{, }\AttributeTok{replace=}\ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{arrange}\NormalTok{(g) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Fisher\textquotesingle{}s iris data set (sample of 20)"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-22}Fisher's iris data set (sample of 20)}
+\centering
+\begin{tabular}[t]{r|r|r|r|r|r|r|r|r|r|l}
+\hline
+x.1 & x.2 & x.3 & x.4 & x.5 & x.6 & x.7 & x.8 & x.9 & x.10 & g\\
+\hline
+0.749851025 & 0.42536509 & 1.3173758 & 1.317461341 & 0.70921426 & -0.14447884 & 1.0046567 & 0.9801993 & 0.100989758 & -0.2276432 & aa\\
+\hline
+0.977984423 & 0.89532759 & 1.2207359 & 1.008043903 & 0.24682525 & 0.73396133 & 1.3064363 & 0.9323980 & -0.378151143 & 0.6639253 & aa\\
+\hline
+-0.620717459 & -1.25365205 & 0.9720544 & 0.927324321 & 0.46851688 & 0.05398303 & 1.2676129 & 1.2744318 & 0.509881076 & 0.3190598 & aa\\
+\hline
+1.590814960 & 1.20743304 & 0.8775522 & 0.797464969 & -0.74574539 & 0.68096755 & 1.2099754 & 0.7093984 & -0.292568707 & 0.8648671 & aa\\
+\hline
+-0.421883145 & -0.64953130 & 0.7185239 & 0.889523995 & 0.54555787 & -1.58550211 & 0.2918856 & 0.6081029 & 0.178506639 & -1.2863135 & aa\\
+\hline
+-0.214175613 & -2.20568534 & 0.1609645 & 0.259535997 & -0.18192694 & -1.07110460 & 0.4195426 & 0.5736881 & -0.072443998 & -0.7418664 & ao\\
+\hline
+1.001575397 & -1.10827146 & 0.4198801 & 0.672165584 & 0.35190413 & -1.64689921 & 0.4143923 & 0.8154139 & 0.423540438 & -1.2390140 & ao\\
+\hline
+0.095633962 & -0.86494022 & 0.9254107 & 0.897486776 & 0.49967527 & -0.28065426 & 0.7839673 & 0.8671793 & 0.001839794 & -0.1432605 & ao\\
+\hline
+0.495578194 & 0.50792246 & 0.2574993 & -0.007364246 & 0.37588006 & 0.38630422 & 0.3345241 & 0.2801767 & 0.208565782 & 0.2278819 & ao\\
+\hline
+-0.064264057 & 0.81899630 & 1.1353446 & 0.793323408 & -0.11136314 & 1.00523739 & 1.2157413 & 0.6174472 & -0.204505662 & 0.9809478 & ao\\
+\hline
+-0.003019203 & -0.89725601 & -0.6400235 & -0.731735383 & -1.38859756 & -1.09877210 & -0.7145681 & -1.1362146 & -2.108008162 & -1.4188803 & dcl\\
+\hline
+-1.709383896 & 0.38195238 & -0.6344858 & -0.670615485 & 0.04532369 & -0.49395238 & -0.7291833 & -1.0294985 & -1.163153692 & -0.6155998 & dcl\\
+\hline
+0.775095496 & -0.06300461 & -1.7923832 & -0.128169041 & 1.52204366 & 1.50642024 & 0.1653704 & -2.3135297 & -1.032030481 & 0.7663710 & iy\\
+\hline
+-1.650960354 & -0.01214002 & -0.9478223 & 0.649418051 & 1.79003374 & 1.51844071 & -0.5313254 & -1.3231866 & -0.243932179 & 1.1709082 & iy\\
+\hline
+-0.353391283 & 0.86431042 & 0.8001181 & 0.420579637 & -0.46066244 & 0.86185283 & 1.0614526 & 0.5833422 & -0.222084510 & 1.0970174 & iy\\
+\hline
+2.973236231 & 1.25811559 & 0.1989011 & 0.351261606 & 0.60174677 & 0.56932018 & 0.3493892 & -0.1214119 & -0.233311625 & 0.2873450 & sh\\
+\hline
+-0.158240501 & -1.37631288 & -2.0132774 & -2.143952160 & -1.84594654 & -1.49861219 & -1.9958099 & -1.9113128 & -1.547896983 & -1.8834035 & sh\\
+\hline
+1.089543592 & 0.80715500 & -0.9336691 & -1.078770094 & -1.90010279 & -0.54235794 & -0.7036103 & -0.4735661 & -0.291198221 & -0.3778614 & sh\\
+\hline
+0.631639671 & -0.04039004 & -1.1079806 & -1.481325260 & -1.58166247 & -1.64029973 & -1.1716177 & -0.4367914 & -0.494410728 & -0.7418664 & sh\\
+\hline
+-0.337052774 & -0.08995197 & -0.7838467 & -1.286246944 & -0.82709453 & -0.61725568 & -1.7794591 & -1.2011727 & -1.069437033 & -0.6733912 & sh\\
+\hline
+\end{tabular}
+\end{table}
+
+Let's print again the basic statistics:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_sc }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{summary}\NormalTok{(.) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Basic statistics. Phoneme data set"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-23}Basic statistics. Phoneme data set}
+\centering
+\begin{tabular}[t]{l|l|l|l|l|l|l|l|l|l|l|l}
+\hline
+  &       x.1.V1        &       x.2.V1        &       x.3.V1        &       x.4.V1        &       x.5.V1        &       x.6.V1        &       x.7.V1        &       x.8.V1        &       x.9.V1        &       x.10.V1       &   g\\
+\hline
+ & Min.   :-4.925778 & Min.   :-4.053721 & Min.   :-4.989301 & Min.   :-4.316003 & Min.   :-4.028564 & Min.   :-4.412078 & Min.   :-3.498327 & Min.   :-3.414333 & Min.   :-3.237034 & Min.   :-3.677922 & aa : 695\\
+\hline
+ & 1st Qu.:-0.633804 & 1st Qu.:-0.699138 & 1st Qu.:-0.700675 & 1st Qu.:-0.716379 & 1st Qu.:-0.727771 & 1st Qu.:-0.763987 & 1st Qu.:-0.782955 & 1st Qu.:-0.791155 & 1st Qu.:-0.768248 & 1st Qu.:-0.804364 & ao :1022\\
+\hline
+ & Median : 0.021707 & Median :-0.001314 & Median : 0.258538 & Median : 0.289050 & Median : 0.048690 & Median : 0.008843 & Median : 0.139521 & Median : 0.118498 & Median : 0.053990 & Median : 0.070276 & dcl: 757\\
+\hline
+ & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & Mean   : 0.000000 & iy :1163\\
+\hline
+ & 3rd Qu.: 0.670390 & 3rd Qu.: 0.733878 & 3rd Qu.: 0.831896 & 3rd Qu.: 0.801861 & 3rd Qu.: 0.776425 & 3rd Qu.: 0.856265 & 3rd Qu.: 0.871151 & 3rd Qu.: 0.841674 & 3rd Qu.: 0.787320 & 3rd Qu.: 0.810119 & sh : 872\\
+\hline
+ & Max.   : 2.986955 & Max.   : 2.591761 & Max.   : 1.962661 & Max.   : 1.971406 & Max.   : 2.272496 & Max.   : 2.519681 & Max.   : 2.089929 & Max.   : 2.246553 & Max.   : 2.239612 & Max.   : 2.433316 & NA\\
+\hline
+\end{tabular}
+\end{table}
+
+As we can see, we have now zero mean.
+
+\hypertarget{split-the-data}{%
+\paragraph{Split the data}\label{split-the-data}}
+
+Let's first split the data into training set (80\%) and test set (20\%):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(caret)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'caret' was built under R version 4.1.3
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: lattice
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'caret'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:purrr':
+## 
+##     lift
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{7}\NormalTok{)}
+\NormalTok{training.samples }\OtherTok{\textless{}{-}}\NormalTok{ data\_sc}\SpecialCharTok{$}\NormalTok{g }\SpecialCharTok{\%\textgreater{}\%} \CommentTok{\# return the indexes of the rows}
+      \FunctionTok{createDataPartition}\NormalTok{(}\AttributeTok{p =} \FloatTok{0.8}\NormalTok{, }\AttributeTok{list =} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{train.data }\OtherTok{\textless{}{-}}\NormalTok{ data\_sc[training.samples, ]}
+\NormalTok{test.data }\OtherTok{\textless{}{-}}\NormalTok{ data\_sc[}\SpecialCharTok{{-}}\NormalTok{training.samples, ]}
+\FunctionTok{paste0}\NormalTok{(}\StringTok{"Proportion of training is "}\NormalTok{, }\FunctionTok{round}\NormalTok{((}\FunctionTok{nrow}\NormalTok{(train.data)}\SpecialCharTok{/}\FunctionTok{nrow}\NormalTok{(data\_sc))}\SpecialCharTok{*}\DecValTok{100}\NormalTok{,}\DecValTok{2}\NormalTok{),}\StringTok{"\%"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Proportion of training is 80.04%"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{paste0}\NormalTok{(}\StringTok{"Proportion of training is "}\NormalTok{, }\FunctionTok{round}\NormalTok{((}\FunctionTok{nrow}\NormalTok{(test.data)}\SpecialCharTok{/}\FunctionTok{nrow}\NormalTok{(data\_sc))}\SpecialCharTok{*}\DecValTok{100}\NormalTok{,}\DecValTok{2}\NormalTok{),}\StringTok{"\%"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Proportion of training is 19.96%"
+\end{verbatim}
+
+\hypertarget{running-lda}{%
+\subsubsection{Running LDA}\label{running-lda}}
+
+The LDA method starts by finding directions that maximize the separation
+between classes, then it uses these directions to predict the class of
+individuals.
+
+These directions, called discriminant function (DF or linear
+discriminants), are a linear combinations of predictor variables.
+
+LDA assumes that predictors (i.e.~the features) are normally distributed
+(Gaussian distribution) and that the different classes have
+class-specific means and equal variance/covariance (i.e.~spread); pay
+attention: this does not always happen.
+
+Therefore, before performing LDA, we should:
+
+\begin{itemize}
+\tightlist
+\item
+  Inspecting the univariate distributions of each variable and make sure
+  that they are normally distributed.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    If not, you can transform them using log and root for exponential
+    distributions and Box-Cox for skewed distributions.
+  \end{itemize}
+\item
+  Removing outliers from your data
+\item
+  Standardize the variables to make their scale comparable.
+\end{itemize}
+
+We have already standardized the variables and removed the outliers, we
+should now check the univariate distribution of each variable.
+
+\hypertarget{check-variables-normal-distribution}{%
+\paragraph{Check variables normal
+distribution}\label{check-variables-normal-distribution}}
+
+In order to check whether the dataset variables follow a normal
+distribution, we decided to apply the {[}Shapiro-Wilk{]}
+(\url{https://en.wikipedia.org/wiki/Shapiro\%E2\%80\%93Wilk_test}) test.
+
+We can visually check the normality of the variables using density plot,
+which allows to clearly see whether the distribution is bell-shaped.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{1}\NormalTok{])); }\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{2}\NormalTok{]));}\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{3}\NormalTok{])); }\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{4}\NormalTok{]));}\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{5}\NormalTok{])); }\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{6}\NormalTok{]));}\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{7}\NormalTok{])); }\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{8}\NormalTok{]));}\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{9}\NormalTok{])); }\FunctionTok{plot}\NormalTok{(}\FunctionTok{density}\NormalTok{(data\_sc[, }\DecValTok{10}\NormalTok{]));}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-1.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-2.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-3.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-4.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-5.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-6.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-7.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-8.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-9.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-25-10.pdf} Another
+way for a visual inspecton is the Q-Q plot:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggpubr)}
+\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{1}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{2}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{3}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{4}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{5}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{6}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{7}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{8}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{9}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}\FunctionTok{ggqqplot}\NormalTok{(data\_sc[,}\DecValTok{10}\NormalTok{], }\AttributeTok{col=}\DecValTok{2}\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-1.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-2.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-3.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-4.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-5.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-6.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-7.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-8.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-9.pdf}
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-26-10.pdf} The
+plots above clearly show that none of the predictors follows a normal
+distribution, since the points do not fall along the reference line.
+
+To have more precise insights, we can apply the normality test we
+mentioned before to each variable:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Perform the test}
+\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{1}\NormalTok{]); }\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{2}\NormalTok{]); }\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{3}\NormalTok{]); }\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{4}\NormalTok{]);}\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{5}\NormalTok{]);}\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{6}\NormalTok{]); }\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{7}\NormalTok{]); }\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{8}\NormalTok{]); }\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{9}\NormalTok{]);}\FunctionTok{shapiro.test}\NormalTok{(data\_sc[,}\DecValTok{10}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 1]
+## W = 0.9958, p-value = 4.723e-10
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 2]
+## W = 0.99438, p-value = 2.971e-12
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 3]
+## W = 0.93666, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 4]
+## W = 0.92631, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 5]
+## W = 0.98711, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 6]
+## W = 0.98173, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 7]
+## W = 0.96173, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 8]
+## W = 0.97152, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 9]
+## W = 0.98617, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  data_sc[, 10]
+## W = 0.98207, p-value < 2.2e-16
+\end{verbatim}
+
+The low p-values reject the null hypoteses for every variable (from x.1
+to x.10), as we expected from the plots.
+
+We can now make each variable to have a normal distribution, in order to
+properly apply LDA:
+
+The linear discriminant analysis can be easily computed using the
+function \emph{lda} (MASS package), using the training data subset.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(model }\OtherTok{\textless{}{-}} \FunctionTok{lda}\NormalTok{(g}\SpecialCharTok{\textasciitilde{}}\NormalTok{., }\AttributeTok{data =}\NormalTok{ train.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call:
+## lda(g ~ ., data = train.data)
+## 
+## Prior probabilities of groups:
+##        aa        ao       dcl        iy        sh 
+## 0.1540593 0.2266556 0.1679135 0.2579662 0.1934054 
+## 
+## Group means:
+##              x.1         x.2        x.3        x.4        x.5        x.6
+## aa   0.514796307  0.47248134  0.6515864  0.6990875  0.5005258  0.3519525
+## ao   0.137484213  0.68213204  0.6854755  0.3995216  0.2583292  0.5084680
+## dcl -0.638896276 -0.76240758 -0.4856549 -0.5208996 -0.5342928 -0.4686222
+## iy  -0.017569606 -0.02797029  0.2966823  0.6872267  0.7116399  0.3850000
+## sh   0.005703649 -0.48018565 -1.2967416 -1.4767210 -1.1975196 -0.9768013
+##            x.7        x.8        x.9       x.10
+## aa   0.5083223  0.5587519  0.4822598  0.4315880
+## ao   0.4841542  0.3033931  0.2565729  0.3740647
+## dcl -0.5128226 -0.5929116 -0.7756666 -0.9422415
+## iy   0.5019059  0.7291459  0.7917862  0.7779265
+## sh  -1.1663804 -1.2303302 -1.0898149 -0.9989106
+## 
+## Coefficients of linear discriminants:
+##             LD1         LD2         LD3         LD4
+## x.1   0.2555286  0.15189954  0.35760457  0.78502969
+## x.2   0.1424183  0.15414541  1.00445534 -0.15820512
+## x.3  -0.3221939 -1.17752330  0.53857653 -0.51996257
+## x.4  -0.5275077 -1.33980785 -0.18075638  1.20552523
+## x.5  -0.7403163 -0.08920531  0.02980602 -0.19371239
+## x.6  -0.3130233 -1.07163107 -0.79822876 -0.03857307
+## x.7  -0.5718253  0.90537039 -0.02909384 -0.08218801
+## x.8  -0.2627250  0.55356976 -0.51923108 -0.05810776
+## x.9  -0.1488502  0.55230506 -0.14936567 -0.00334460
+## x.10 -0.4848490  1.55793479  0.39546073 -0.59720533
+## 
+## Proportion of trace:
+##    LD1    LD2    LD3    LD4 
+## 0.8710 0.0800 0.0433 0.0057
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-29-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# get the x,y coordinates for the LDA plot  {-}{-}{-}{-}\textgreater{} i.e. to obtain the new LD coordinates}
+\NormalTok{data.lda.values }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(model)}
+ 
+\DocumentationTok{\#\# create a dataframe that has all the info we need to draw a graph}
+\NormalTok{plot.data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{X=}\NormalTok{data.lda.values}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\NormalTok{], }
+                        \AttributeTok{Y=}\NormalTok{data.lda.values}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{2}\NormalTok{],}
+                        \AttributeTok{Phonemes=}\NormalTok{train.data}\SpecialCharTok{$}\NormalTok{g)}
+\FunctionTok{head}\NormalTok{(plot.data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##           X           Y Phonemes
+## 1  5.804837  1.00868386       sh
+## 2 -2.450733  0.67133304       iy
+## 3  4.525426 -0.52704080      dcl
+## 4  3.832477 -1.83685775      dcl
+## 5 -1.839391  0.06330023       aa
+## 6 -1.225564 -0.19748585       iy
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# draw a graph using ggplot2}
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data=}\NormalTok{plot.data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{X, }\AttributeTok{y=}\NormalTok{Y)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{color=}\NormalTok{Phonemes)) }\SpecialCharTok{+}
+    \FunctionTok{xlab}\NormalTok{(}\StringTok{"LD1"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{ylab}\NormalTok{(}\StringTok{"LD2"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme\_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{LDA_files/figure-latex/unnamed-chunk-30-1.pdf} \#\#\#
+Predictions
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions }\OtherTok{\textless{}{-}}\NormalTok{ model }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{predict}\NormalTok{(test.data)}
+\FunctionTok{names}\NormalTok{(predictions)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "class"     "posterior" "x"
+\end{verbatim}
+
+The \emph{predict} function returns the following elements:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{class}: predicted classes of observations.
+\item
+  \emph{posterior}: is a matrix whose columns are the groups, rows are
+  the individuals and values are the posterior probability that the
+  corresponding observation belongs to the groups.
+\item
+  \emph{x}: contains the linear discriminants (DF), described above
+\end{itemize}
+
+Inspect the results:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Predicted classes:}
+\FunctionTok{head}\NormalTok{(predictions}\SpecialCharTok{$}\NormalTok{class, }\DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] ao ao ao ao sh sh
+## Levels: aa ao dcl iy sh
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Predicted probabilities of class membership.}
+\NormalTok{predictions}\SpecialCharTok{$}\NormalTok{posterior[}\FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(predictions}\SpecialCharTok{$}\NormalTok{posterior), }\DecValTok{10}\NormalTok{, }\AttributeTok{replace=}\ConstantTok{FALSE}\NormalTok{),] }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Predicted probabilities of class membership (sample of 10)"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-32}Predicted probabilities of class membership (sample of 10)}
+\centering
+\begin{tabular}[t]{l|r|r|r|r|r}
+\hline
+  & aa & ao & dcl & iy & sh\\
+\hline
+256 & 0.0000244 & 0.0003460 & 0.2707321 & 0.0000031 & 0.7288944\\
+\hline
+3736 & 0.2714042 & 0.6660826 & 0.0006535 & 0.0618595 & 0.0000001\\
+\hline
+4079 & 0.2331682 & 0.6685656 & 0.0653754 & 0.0325049 & 0.0003859\\
+\hline
+298 & 0.0299368 & 0.0136904 & 0.0000004 & 0.9563725 & 0.0000000\\
+\hline
+1959 & 0.1304670 & 0.3225580 & 0.0000669 & 0.5469081 & 0.0000000\\
+\hline
+4056 & 0.0952443 & 0.0482190 & 0.0000030 & 0.8565337 & 0.0000000\\
+\hline
+3498 & 0.0056973 & 0.0126769 & 0.5991016 & 0.0001035 & 0.3824207\\
+\hline
+869 & 0.1715540 & 0.7020243 & 0.0035034 & 0.1229168 & 0.0000014\\
+\hline
+1578 & 0.3483857 & 0.5967656 & 0.0114436 & 0.0433970 & 0.0000082\\
+\hline
+62 & 0.0001598 & 0.0014731 & 0.9931421 & 0.0000028 & 0.0052222\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Linear discriminants}
+\FunctionTok{head}\NormalTok{(predictions}\SpecialCharTok{$}\NormalTok{x, }\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          LD1        LD2        LD3        LD4
+## 9  -1.359953 -1.5892639 -0.3235975 -0.2752251
+## 10 -1.138917 -0.8174010 -0.2366449 -0.4451311
+## 12 -3.067282  0.3104655  2.2302633 -0.3149128
+\end{verbatim}
+
+\hypertarget{model-accuracy}{%
+\subsubsection{Model accuracy}\label{model-accuracy}}
+
+We can compute model accuracy in this wa
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(predictions}\SpecialCharTok{$}\NormalTok{class}\SpecialCharTok{==}\NormalTok{test.data}\SpecialCharTok{$}\NormalTok{g)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7377778
+\end{verbatim}
+
+It can be seen that, our model correctly classified 73.78\% of
+observations, which is a quite good result.
+
+In order to interpret the goodness of LDA, let's check wether the groups
+have the same variance:
+
+\hypertarget{running-qda}{%
+\subsubsection{Running QDA}\label{running-qda}}
+
+It assumes that the spread/variance in each variable is different
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(MASS)}
+\CommentTok{\#Fit the model}
+\NormalTok{(modelqda }\OtherTok{\textless{}{-}} \FunctionTok{qda}\NormalTok{(g }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call:
+## qda(g ~ ., data = train.data)
+## 
+## Prior probabilities of groups:
+##        aa        ao       dcl        iy        sh 
+## 0.1540593 0.2266556 0.1679135 0.2579662 0.1934054 
+## 
+## Group means:
+##              x.1         x.2        x.3        x.4        x.5        x.6
+## aa   0.514796307  0.47248134  0.6515864  0.6990875  0.5005258  0.3519525
+## ao   0.137484213  0.68213204  0.6854755  0.3995216  0.2583292  0.5084680
+## dcl -0.638896276 -0.76240758 -0.4856549 -0.5208996 -0.5342928 -0.4686222
+## iy  -0.017569606 -0.02797029  0.2966823  0.6872267  0.7116399  0.3850000
+## sh   0.005703649 -0.48018565 -1.2967416 -1.4767210 -1.1975196 -0.9768013
+##            x.7        x.8        x.9       x.10
+## aa   0.5083223  0.5587519  0.4822598  0.4315880
+## ao   0.4841542  0.3033931  0.2565729  0.3740647
+## dcl -0.5128226 -0.5929116 -0.7756666 -0.9422415
+## iy   0.5019059  0.7291459  0.7917862  0.7779265
+## sh  -1.1663804 -1.2303302 -1.0898149 -0.9989106
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Make predictions}
+\NormalTok{predictionsqda }\OtherTok{\textless{}{-}}\NormalTok{ modelqda }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{predict}\NormalTok{(test.data)}
+\CommentTok{\# Model accuracy}
+\FunctionTok{mean}\NormalTok{(predictionsqda}\SpecialCharTok{$}\NormalTok{class }\SpecialCharTok{==}\NormalTok{ test.data}\SpecialCharTok{$}\NormalTok{g)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7422222
+\end{verbatim}
+
+QDA model correctly classified 74.22\% of observations, which is
+excellent (the same value as before. Small data set).
+
+The improvement is due to the fact that QDA is more flexible with
+respect to LDA, since it doesn't assume equality of variance inside each
+cluster. We also know that QDA is better for large training sets.
+
+\hypertarget{running-fda}{%
+\subsubsection{Running FDA}\label{running-fda}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mda)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'mda' was built under R version 4.1.3
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: class
+\end{verbatim}
+
+\begin{verbatim}
+## Loaded mda 0.5-2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Fit the model}
+\NormalTok{(modelfda }\OtherTok{\textless{}{-}} \FunctionTok{fda}\NormalTok{(g }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call:
+## fda(formula = g ~ ., data = train.data)
+## 
+## Dimension: 4 
+## 
+## Percent Between-Group Variance Explained:
+##     v1     v2     v3     v4 
+##  87.10  95.10  99.43 100.00 
+## 
+## Degrees of Freedom (per dimension): 11 
+## 
+## Training Misclassification Error: 0.25104 ( N = 3609 )
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Make predictions}
+\NormalTok{predictionsfda }\OtherTok{\textless{}{-}}\NormalTok{ modelfda }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{predict}\NormalTok{(test.data)}
+\CommentTok{\# Model accuracy}
+\NormalTok{modelfda}\SpecialCharTok{$}\NormalTok{confusion}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          true
+## predicted  aa  ao dcl  iy  sh
+##       aa  200 126   3  50   1
+##       ao  224 577  22  86   7
+##       dcl   8  14 513   4  68
+##       iy  124  99  16 791   0
+##       sh    0   2  52   0 622
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{confusion}\NormalTok{(modelfda,test.data) }\SpecialCharTok{\%\textgreater{}\%} \CommentTok{\#Confusion in the test data }
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Confusion matrix in the test data"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-35}Confusion matrix in the test data}
+\centering
+\begin{tabular}[t]{l|r|r|r|r|r}
+\hline
+  & aa & ao & dcl & iy & sh\\
+\hline
+aa & 44 & 31 & 0 & 6 & 0\\
+\hline
+ao & 62 & 141 & 6 & 27 & 1\\
+\hline
+dcl & 1 & 9 & 122 & 2 & 13\\
+\hline
+iy & 32 & 23 & 3 & 197 & 0\\
+\hline
+sh & 0 & 0 & 20 & 0 & 160\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sum}\NormalTok{(}\FunctionTok{diag}\NormalTok{(}\FunctionTok{confusion}\NormalTok{(modelfda,test.data)))}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(}\FunctionTok{confusion}\NormalTok{(modelfda,test.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7377778
+\end{verbatim}
+
+FDA model correctly classified 73.78\% of observations, which is
+excellent, better than before.
+
+\hypertarget{running-rda}{%
+\subsubsection{Running RDA}\label{running-rda}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(klaR)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'klaR' was built under R version 4.1.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Fit the model}
+\NormalTok{(modelrda }\OtherTok{\textless{}{-}} \FunctionTok{rda}\NormalTok{(g }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call: 
+## rda(formula = g ~ ., data = train.data)
+## 
+## Regularization parameters: 
+##        gamma       lambda 
+## 3.046231e-05 5.264054e-01 
+## 
+## Prior probabilities of groups: 
+##        aa        ao       dcl        iy        sh 
+## 0.1540593 0.2266556 0.1679135 0.2579662 0.1934054 
+## 
+## Misclassification rate: 
+##        apparent: 23.469 %
+## cross-validated: 24.102 %
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Make predictions}
+\NormalTok{predictionsrda }\OtherTok{\textless{}{-}}\NormalTok{ modelrda }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{predict}\NormalTok{(test.data)}
+\CommentTok{\# Model accuracy}
+\FunctionTok{mean}\NormalTok{(predictionsrda}\SpecialCharTok{$}\NormalTok{class }\SpecialCharTok{==}\NormalTok{ test.data}\SpecialCharTok{$}\NormalTok{g)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7455556
+\end{verbatim}
+
+RDA model correctly classified NaN\% of observations, which is
+excellent.
+
+\hypertarget{mda}{%
+\subsubsection{MDA}\label{mda}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mda)}
+\CommentTok{\#Fit the model}
+\NormalTok{(modelmda }\OtherTok{\textless{}{-}} \FunctionTok{mda}\NormalTok{(g }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ train.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call:
+## mda(formula = g ~ ., data = train.data)
+## 
+## Dimension: 12 
+## 
+## Percent Between-Group Variance Explained:
+##     v1     v2     v3     v4     v5     v6     v7     v8     v9    v10    v11 
+##  52.28  79.38  90.64  94.83  97.86  99.36  99.80  99.95  99.98 100.00 100.00 
+##    v12 
+## 100.00 
+## 
+## Degrees of Freedom (per dimension): 11 
+## 
+## Training Misclassification Error: 0.2624 ( N = 3609 )
+## 
+## Deviance: 5441.864
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Make predictions}
+\NormalTok{predictionsmda }\OtherTok{\textless{}{-}}\NormalTok{ modelmda }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{predict}\NormalTok{(test.data)}
+\CommentTok{\# Model accuracy}
+\NormalTok{modelmda}\SpecialCharTok{$}\NormalTok{confusion }\CommentTok{\#Confusion in the train data}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          true
+## predicted  aa  ao dcl  iy  sh
+##       aa  219 168   5 123   2
+##       ao  213 552  27  92   1
+##       dcl   8  12 519   4  35
+##       iy  116  83   7 712   0
+##       sh    0   3  48   0 660
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{confusion}\NormalTok{(modelmda,test.data) }\SpecialCharTok{\%\textgreater{}\%} \CommentTok{\#Confusion in the test data }
+  \FunctionTok{kbl}\NormalTok{(}\AttributeTok{caption =} \StringTok{"Confusion matrix in the test data"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{kable\_classic}\NormalTok{(}\AttributeTok{full\_width =}\NormalTok{ F, }\AttributeTok{html\_font =} \StringTok{"Cambria"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-37}Confusion matrix in the test data}
+\centering
+\begin{tabular}[t]{l|r|r|r|r|r}
+\hline
+  & aa & ao & dcl & iy & sh\\
+\hline
+aa & 47 & 50 & 2 & 41 & 1\\
+\hline
+ao & 61 & 122 & 7 & 28 & 0\\
+\hline
+dcl & 2 & 9 & 123 & 4 & 5\\
+\hline
+iy & 29 & 23 & 1 & 159 & 0\\
+\hline
+sh & 0 & 0 & 18 & 0 & 168\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sum}\NormalTok{(}\FunctionTok{diag}\NormalTok{(}\FunctionTok{confusion}\NormalTok{(modelmda,test.data)))}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(}\FunctionTok{confusion}\NormalTok{(modelmda,test.data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.6877778
+\end{verbatim}
+
+MDA model correctly classified 68.78\% of observations, which is
+excellent, better than before.
+
+\end{document}

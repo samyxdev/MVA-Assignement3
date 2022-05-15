@@ -399,10 +399,15 @@ Let's check the correlation between numerical variables:
 
 ```{r}
 library(GGally)
-options(repr.plot.width = 24, repr.plot.height = 8)
+
+x11(width = 20, height = 15)
+
+#options(repr.plot.width = 24, repr.plot.height = 8)
 ggpairs(data, columns = 1:10, 
         ggplot2::aes(colour=g),
         title="Correlation matrix. Phoneme data")
+
+Sys.sleep(10)
 ```
 
 We can see that they are pretty correlated.

@@ -10,13 +10,16 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Delete eventual R objects in memory.
+Delete eventual R objects in memory:
+
 ```{r, include=TRUE}
 rm(list = ls())
 ```
 
-At first, let's load the libraries we'll need. 
-The package *MASS* runs the LDA, *dplyr* and *ggplot2* will help us with data manipulation and graphs, and *kableExtra* will help us to print beautiful tables.
+At first, let's load the libraries we'll need.
+
+The package *MASS* runs the LDA; *dplyr* and *ggplot2* will help us with data manipulation and graphs, and *kableExtra* will help us to print beautiful tables.
+
 ```{r message=FALSE,warning=FALSE}
 library(MASS)
 library(dplyr)
@@ -24,50 +27,43 @@ library(ggplot2)
 library(kableExtra)
 ```
 
+## Exploratory data analysis
 
-### Exploratory data analysis
+The dataset we are going to analyze is 'phoneme.csv'. It contains samples of digitized speech for five phonemes: 'aa' (as the vowel in dark), 'ao' (as the first vowel in water), 'dcl' (as in dark), 'iy' (as the vowel in she), and 'sh '(as in she). In total, 4509 speech frames of 32 msec were selected. For each speech frame, a log-periodogram of length 256 was computed, on whose basis we want to perform speech recognition. The 256 columns labeled x.1 to x.256 identify the speech features, while the columns g and speaker indicate the phonemes (labels) and speakers, respectively. We'll use only the first 10 columns, i.e., from x.1 to x.10, and the labels (column g).
 
+Load the data from the csv file.
 
-The dataset we are going to analyze is 'phoneme.csv'.
-The data set contains samples of digitized speech for five phonemes: aa (as the vowel 
-in dark), ao (as the first vowel in water), dcl (as in dark), iy (as the vowel in she), and sh (as in she). 
-In total, 4509 speech frames of 32 msec were selected. For each speech frame, a log-periodogram 
-of length 256 was computed, on whose basis we want to perform speech recognition. 
-The 256 
-columns labeled x.1 to x.256 identify the speech features, while the 
-columns g and speaker indicate the phonemes (labels) and speakers, respectively. Use only the 
-first 10 columns, i.e., from x.1 to x.10, and the labels (column g)
-
-
-Let's now load the data from the csv file.
-```{r, include=TRUE}
+```{r}
 all_data <- read.csv("phoneme.csv", header = TRUE)
 ```
 
-
 Check the dimension:
+
 ```{r}
 dim(all_data)
 ```
+
 We have 259 columns, since the 1st one is the row index.
 
+We'll need to use only the speech features from x.1 to x.10 and the g column. Let's select the columns of interest:
 
-We'll need to use only the columns from x.1 to x.10 and the g column:
 ```{r}
 data <- all_data[, c(2:11, 258)]
 ```
 
-Let's check again the dimension:
+Check again the dimension:
+
 ```{r}
 dim(data)
 ```
 
-We can check the structure:
+Check the structure:
+
 ```{r}
 str(data)
 ```
-The 10 numerical variables are read by R as numeric, while the class variable is read as a character. 
-Let's transform it into a factor, by using the 'purrr' package:
+
+The 10 numerical variables are read by R as numeric, while the 'g' variable is read as a character. Let's transform it into a factor, by using the *purr* package:
 
 ```{r}
 library(purrr)
@@ -75,28 +71,33 @@ data %>% modify_if(is.character, as.factor) -> data
 ```
 
 Let's now check again the structure:
+
 ```{r}
 str(data)
 ```
-The 'g' variable has correctly been converted into the R factor type.
-Now, all the variables are well defined, and we don't have to do any further change to the variable type.
+
+The 'g' variable has correctly been converted into the R factor type. Now, all the variables are well defined, and we don't have to do any further change to the variable type.
 
 Let's check the distribution of the samples along the 5 classes:
+
 ```{r}
 table(Phonemes=data$g) %>% 
 kbl(caption = "Frequency table. Phoneme data set") %>%
 kable_classic(full_width = F, html_font = "Cambria")
 ```
 
-We can print a portion (a sample of 20) of the table using kable and the pipe operator:
+We can print a portion (a sample of 10) of the table using kable and the pipe operator:
+
 ```{r}
 data %>%
-  sample_n(., 20, replace=FALSE) %>% 
+  sample_n(., 10, replace=FALSE) %>% 
   arrange(g) %>% 
   kbl(caption = "Phoneme data set (sample of 20)") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 ```
-Let's now visualize some basic statistics on each of the data frame's columns with _summary_:
+
+Let's now visualize some basic statistics on each of the data frame's columns with *summary*:
+
 ```{r}
 data %>% 
   summary(.) %>% 
@@ -104,15 +105,227 @@ data %>%
   kable_classic(full_width = F, html_font = "Cambria")
 ```
 
+### Check for missing values
 
-Let's get a rough estimate of the distribution of the values for each attribute broken down by each class, since we have labels for each class.
+Let's check for NA values:
 
+```{r}
+colSums((is.na((data))))
+```
+
+There are no missing values!
+
+### Outliers
+
+One way to check for multivariate outliers is to use the [Malhanobis' distance](https://en.wikipedia.org/wiki/Mahalanobis_distance) . It can be thought of as a metric for estimating how far each observation is from the center of all the variables' distributions (i.e. the centroid in the multivariate space).
+
+We'll use the *chemometrics* package, which contains a function ('Moutlier') for calculating and plotting both the "Mahalanobis'" distance and a robust version of the "Mahalanobis'" distance.
+
+At first, let's calculate the "Mahalanobis'" distances using the 'Moutlier' function, to which we provide as parameters the numeric data frame, the quantile cutoff point beyond which we want to identify points as outliers, and whether or not we want a plot:
+
+```{r}
+#install.packages("chemometrics")
+library(chemometrics)
+md <- Moutlier(data[, 1:10], quantile = 0.99, plot=FALSE)
+```
+
+Notice that the function considers only numerical attributes, that's why we select only the predictors columns.
+
+The function returns the cutoff value for the outliers:
+
+```{r}
+md$cutoff
+```
+
+We simply use the 'which' function to identify which cases are outliers according to the 'cutoff' value and in this way we obtain the outliers' indexes:
+
+```{r}
+outliers <- which(md$md > md$cutoff)
+head(outliers, 10) # show first 10 outliers according to Malhanobis distance
+```
+
+An alternative way for identifying multivariate outliers (non-parametric approach) is to use the LOF ("local outlier factor") algorithm, which identifies density-based local outliers.
+
+The algorithm we are going to use (from the package [DDoutlier](https://rdrr.io/cran/DDoutlier/man/LOF.html)) computes a local density for observations with a given k-nearest neighbors (we choose k = 5). This local density is compared to the density of the respective nearest neighbors, resulting in the local outlier factor.
+
+Therefore, the function returns a vector of LOF scores for each observation: the greater the LOF, the greater the outlierness of the data point.
+
+```{r}
+#install.packages('DDoutlier')
+library("DDoutlier")
+lof <- LOF(data[, 1:10], k = 5) # outlier score with a neighborhood of 5 points
+```
+
+Notice that the function considers only numerical attributes, that's why we select only the predictors columns in our dataframe.
+
+We can show the lof scores for the 5 first observations:
+
+```{r}
+head(lof)
+```
+
+We can see and visualize the distribution of outlier scores:
+
+```{r}
+summary(lof) # some statistics
+hist(lof)
+```
+
+It could be useful to plot also the sorted LOF scores:
+
+```{r}
+plot(sort(lof), type = "l",  main = "LOF (K = 5)",
+  xlab = "Points sorted by LOF", ylab = "LOF")
+```
+
+Looks like outliers start around a LOF value of 1.4.
+
+Let's show the indexes for 10 most outlying observations
+
+```{r}
+lof_with_names = lof
+names(lof_with_names) <- 1:nrow(data[, 1:10])
+sort(lof_with_names, decreasing = TRUE)[1:10]
+```
+
+Let's first find the indexes of the outliers with a lof score above 1.4:
+
+```{r}
+outliers <- which(lof > 1.4)
+```
+
+Number of detected outliers:
+
+```{r}
+length(outliers)
+```
+
+We will simply remove the found outliers (found with LOF) from the dataset, considering that we have more than 4k observations:
+
+```{r}
+data = data[-outliers, ] 
+```
+
+Let's now check again the dimensions:
+
+```{r}
+dim(data)
+```
+
+The outliers have been correctly removed!
+
+### Check predictors normal distribution
+
+Let's now check the univariate distribution of each variable.
+
+We'll use the density plot, which allows to clearly see whether the distribution is bell-shaped or not:
+
+```{r}
+library(gridExtra)
+library(ggplot2)
+g1 <- ggplot(data, aes(x=x.1)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g2 <- ggplot(data, aes(x=x.2)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g3 <- ggplot(data, aes(x=x.3)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g4 <- ggplot(data, aes(x=x.4)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g5 <- ggplot(data, aes(x=x.5)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g6 <- ggplot(data, aes(x=x.6)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g7 <- ggplot(data, aes(x=x.7)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g8 <- ggplot(data, aes(x=x.8)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g9 <- ggplot(data, aes(x=x.9)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+g10 <- ggplot(data, aes(x=x.10)) +
+    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+grid.arrange(g1,g2, nrow=1); grid.arrange(g3,g4,nrow=1);grid.arrange(g5,g6,nrow=1); grid.arrange(g7,g8,nrow=1); grid.arrange(g9,g10,nrow=1)
+```
+
+A better approach for a visual inspection is the *Q-Q plot*, which shows the distribution of the data against the expected normal distribution. In particular, for normally distributed data, observations should lie approximately on a straight line. If the data is non-normal, the points form a curve that deviates markedly from a straight line. Let's perform such plot for each predictor, by using the library *ggpubr*:
+
+```{r}
+library(gridExtra)
+library(ggpubr)
+library(ggplot2)
+g1 <- ggqqplot(data[,1], col=2, ggtheme = theme_gray(), title = "x.1 Q-Q plot")
+g2 <- ggqqplot(data[,2], col=2, ggtheme = theme_gray(), title = "x.2 Q-Q plot")
+g3 <- ggqqplot(data[,3], col=2, ggtheme = theme_gray(), title = "x.3 Q-Q plot")
+g4 <- ggqqplot(data[,4], col=2, ggtheme = theme_gray(), title = "x.4 Q-Q plot")
+g5 <- ggqqplot(data[,5], col=2, ggtheme = theme_gray(), title = "x.5 Q-Q plot")
+g6 <- ggqqplot(data[,6], col=2, ggtheme = theme_gray(), title = "x.6 Q-Q plot")
+g7 <- ggqqplot(data[,7], col=2, ggtheme = theme_gray(), title = "x.7 Q-Q plot")
+g8 <- ggqqplot(data[,8], col=2, ggtheme = theme_gray(), title = "x.8 Q-Q plot")
+g9 <- ggqqplot(data[,9], col=2, ggtheme = theme_gray(), title = "x.9 Q-Q plot")
+g10 <- ggqqplot(data[,10], col=2, ggtheme = theme_gray(), title = "x.10 Q-Q plot")
+grid.arrange(g1,g2, nrow=1); grid.arrange(g3,g4,nrow=1);grid.arrange(g5,g6,nrow=1); grid.arrange(g7,g8,nrow=1); grid.arrange(g9,g10,nrow=1)
+```
+
+The plots above clearly show that none of the predictors (except for the first one) follows a normal distribution, since the points do not fall along the reference line.
+
+To have more precise insights, we can apply the normality [Shapiro-Wilk normality test](https://en.wikipedia.org/wiki/Shapiro%E2%80%93Wilk_test) to each predictor:
+
+```{r}
+for(i in 1:10){
+  print(paste(" Shapiro-Wilk test for predictor x.",i,":"))
+  print(shapiro.test(data[,i]))
+}
+```
+
+The low p-values (\<0.05) reject the null hypotheses for every variable (from x.1 to x.10), as we expected from the plots.
+
+We could use the [*BoxCox*](https://www.ime.usp.br/~abe/lista/pdfQWaCMboK68.pdf) transformations implemented in the package *forecast*. The 'BoxCox' method applies a power transformation, which depends on a parameter $\lambda$. The function 'BoxCox.lambda' of the package finds the optimal value of the $\lambda$ parameter by maximizing the profile log likelihood of a linear model fitted to our data (specifying the value 'loglik' in the 'method' parameter).
+
+One important note is that the algorithm considers only a dataset with positive values.
+
+At first, we can find the $\lambda$ value for each of the predictors:
+
+```{r}
+#install.packages("forecast")
+library(forecast)
+lambda = c() 
+for(i in 1:10){
+  lambda[i] = BoxCox.lambda(data[, i], method = "loglik")
+}
+```
+
+```{r}
+lambda # optimal lambdas
+```
+
+We can now apply the transformations to our dataset. We'll use the *car* library for that, by using the function 'bcPower'
+
+```{r}
+#install.packages("car")
+library(car)
+#library(carData)
+data[, 1:10] = bcPower(data[, 1:10], lambda=lambda)
+```
+
+Let's check again the Shapiro-Wilk test:
+
+```{r}
+for(i in 1:10){
+  print(paste(" Shapiro-Wilk test for predictor x.",i,":"))
+  print(shapiro.test((data[,i])))
+}
+```
+
+As we can see, we were able to obtain a normal distribution for the variable x.1, but not for the others, which follow more a multimodal distribution.
+
+### Classes distributions
+
+We can now get a rough estimate of the distribution of the values for each attribute broken down by each class, since we have labels for each class:
 
 ```{r}
 library(gridExtra)
 g1 <- ggplot(data,aes(x=g, y=x.1, fill=g)) + 
     geom_boxplot() +
-    theme(legend.position="none")
+    theme(legend.position="right")
 g2 <- ggplot(data,aes(x=g, y=x.2, fill=g)) + 
     geom_boxplot() +
     theme(legend.position="none")
@@ -140,14 +353,15 @@ g9 <- ggplot(data,aes(x=g, y=x.9, fill=g)) +
 g10 <- ggplot(data,aes(x=g, y=x.10, fill=g)) + 
     geom_boxplot() +
     theme(legend.position="none")
-grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10, nrow=5)
+grid.arrange(g1,g2,nrow=1); grid.arrange(g3,g4,nrow=1);grid.arrange(g5,g6,nrow=1); grid.arrange(g7,g8,nrow=1); grid.arrange(g9,g10,nrow=1)
 ```
 
 Histograms (or their densities) could be also very useful:
+
 ```{r}
 g1 <- ggplot(data, aes(x = x.1, fill = g)) +
   geom_density(alpha = 0.7) + theme_bw() +
-    theme(legend.position="none")
+    theme(legend.position="right")
 g2 <- ggplot(data, aes(x = x.2, fill = g)) +
   geom_density(alpha = 0.7) + theme_bw() +
     theme(legend.position="none")
@@ -174,36 +388,38 @@ g9 <- ggplot(data, aes(x = x.9, fill = g)) +
     theme(legend.position="none")
 g10 <- ggplot(data, aes(x = x.10, fill = g)) +
   geom_density(alpha = 0.7) + theme_bw() +
-    theme(legend.position = c(0.7, 0.7))
-grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,nrow=5)
+    theme(legend.position="none")
+#grid.arrange(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,nrow=5)
+grid.arrange(g1,g2,nrow=1); grid.arrange(g3,g4,nrow=1);grid.arrange(g5,g6,nrow=1); grid.arrange(g7,g8,nrow=1); grid.arrange(g9,g10,nrow=1)
 ```
 
-We can see differences among the 5 classes, e.g. it seems that sh is the phoneme with the lowest values of the features, except for x.1, x.2 and x.10 
-
-Note: Here, we skip that part of contextualize the results for the sake of saving time. You must comment about the results of EDA in In the Exercises and Final Project.
+We can see the differences among the 5 classes, e.g. it seems that 'sh' is the phoneme with the lowest values of the features, except for x.1, x.2 and x.10; while 'iy' is on average the phoneme with highest values.
 
 Let's check the correlation between numerical variables:
+
 ```{r}
 library(GGally)
+options(repr.plot.width = 24, repr.plot.height = 8)
 ggpairs(data, columns = 1:10, 
         ggplot2::aes(colour=g),
         title="Correlation matrix. Phoneme data")
 ```
+
 We can see that they are pretty correlated.
 
 ### Preparing the dataset
 
 #### Scaling
 
-Discriminant analysis *is not affected* by the scale/unit in which predictor variables are measured, but we can standardize the variables to make their scale comparable. In any case (variables standardized or not), the LDA will give the same results. 
+Discriminant analysis *is not affected* by the scale/unit in which predictor variables are measured, but we can standardize the variables to make their scale comparable.
 
-Typically it is suggested to always normalize:
 ```{r}
 data_sc <- data %>%
         mutate_if(is.numeric, scale)
 ```
 
 We can print a sample of the scaled table to see the new units:
+
 ```{r}
 data_sc %>%
   sample_n(., 20, replace=FALSE) %>% 
@@ -211,18 +427,22 @@ data_sc %>%
   kbl(caption = "Fisher's iris data set (sample of 20)") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 ```
+
 Let's print again the basic statistics:
+
 ```{r}
 data_sc %>% 
   summary(.) %>% 
   kbl(caption = "Basic statistics. Phoneme data set") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 ```
+
 As we can see, we have now zero mean.
 
-
 #### Split the data
-Let's first split the data into training set (80%) and test set (20%):
+
+We can now split the data into training set (80%) and test set (20%):
+
 ```{r}
 library(caret)
 set.seed(7)
@@ -234,37 +454,42 @@ test.data <- data_sc[-training.samples, ]
 paste0("Proportion of training is ", round((nrow(train.data)/nrow(data_sc))*100,2),"%")
 paste0("Proportion of training is ", round((nrow(test.data)/nrow(data_sc))*100,2),"%")
 ```
-### Running LDA
 
-The LDA method starts by finding directions that maximize the separation between classes, then it uses these directions to
-predict the class of individuals. 
+## Running LDA
 
-These directions, called discriminant function (DF or linear discriminants), are a linear combinations of predictor variables.
+The LDA method starts by finding directions that maximize the separation between classes, then it uses these directions to predict the class of individuals.
 
-LDA assumes that predictors (i.e. the features) are normally distributed (Gaussian distribution) and that the different classes have class-specific means and equal variance/covariance (i.e. spread; pay attention: this does not always happen.
+These directions, called discriminant function (DF or linear discriminants), are linear combinations of the predictor variables (in our case the variables from x.1 to x.10).
 
-Therefore, before performing LDA, consider:
+LDA assumes that predictors (i.e. the features) are normally distributed and that the different classes have class-specific means and equal variance/covariance.
 
-* Inspecting the univariate distributions of each variable and make sure that they are normally distributed. 
-  + If not, you can transform them using log and root for exponential distributions and Box-Cox for skewed distributions.
+The linear discriminant analysis can be easily computed using the function *lda* (*MASS* package), using the training data subset.
 
-* Removing outliers from your data 
-* Standardize the variables to make their scale comparable.
-
-The linear discriminant analysis can be easily computed using the function _lda_ (MASS package), using the training data subset.
 ```{r}
 (model <- lda(g~., data = train.data))
 ```
+
+The *lda* output contains the following elements:
+
+-   *Prior probabilities of groups*: the proportion of training observations in each group. For example, there are 15.6% of the training observations in the "aa" class
+-   *Group means*: group center of gravity. Shows the mean of each variable in each group.
+-   *Coefficients of linear discriminants*: Shows the linear combination of predictor variables that are used to form the LDA decision rule.
+
+As we can see, we obtain 4 LDs, since we have 5 classes.
+
+The function *plot* produces plots of the DFs, obtained by computing the LDs for each of the training observations.
+
 ```{r}
 plot(model)
 ```
 
+As we can see, this plot is very difficult to be interpreted, we can better visualize the results by plotting the first 2 LDs, which account for most of the separability:
 
 ```{r}
-## get the x,y coordinates for the LDA plot  ----> i.e. to obtain the new LD coordinates
+# get the x,y coordinates for the LDA plot
 data.lda.values <- predict(model)
  
-## create a dataframe that has all the info we need to draw a graph
+# create a dataframe that has all the info we need to draw a graph with the first 2 LDs
 plot.data <- data.frame(X=data.lda.values$x[,1], 
                         Y=data.lda.values$x[,2],
                         Phonemes=train.data$g)
@@ -275,50 +500,270 @@ ggplot(data=plot.data, aes(x=X, y=Y)) +
     xlab("LD1") + ylab("LD2") +
     theme_bw()
 ```
-### Predictions
+
+The above plot shows a clear separation between the 2 groups "iy" and "sh". Also the "dcl" group is quite clearly identifiable in the middle of the plot. There is a lot of overlapping between the "ao" group and the "aa" group. However, this is not necessary an indication of a "bad" separation among the groups since we are simply visualizing a 2D plot, by taking into consideration only the first 2 LDs.
+
+We can also check the plot of the 3rd and 4th LDs:
+
+```{r}
+# create a dataframe that has all the info we need to draw a graph with the last 2 LDs
+plot.data <- data.frame(X=data.lda.values$x[,3], 
+                        Y=data.lda.values$x[,4],
+                        Phonemes=train.data$g)
+head(plot.data)
+## draw a graph using ggplot2
+ggplot(data=plot.data, aes(x=X, y=Y)) +
+    geom_point(aes(color=Phonemes)) +
+    xlab("LD3") + ylab("LD4") +
+    theme_bw()
+```
+
+#### Predictions
+
+We can see our LDA model predictions on the test data:
+
 ```{r}
 predictions <- model %>% predict(test.data)
 names(predictions)
 ```
-The _predict_ function returns the following elements:
 
-* _class_: predicted classes of observations.
-* _posterior_: is a matrix whose columns are the groups, rows are the individuals and values are the posterior probability
-that the corresponding observation belongs to the groups.
-* _x_: contains the linear discriminants (DF), described above
+The *predict* function returns the following elements:
 
-Inspect the results:
+-   *class*: predicted classes of observations.
+-   *posterior*: is a matrix whose columns are the groups, rows are the individuals and values are the posterior probability that the corresponding observation belongs to the groups.
+-   *x*: contains the linear discriminants (DF), described above
+
+Let's inspect the predicted class for the first 10 test samples:
+
 ```{r}
-# Predicted classes:
-head(predictions$class, 6)
-# Predicted probabilities of class membership.
-predictions$posterior[sample(1:nrow(predictions$posterior), 10, replace=FALSE),] %>% 
-  kbl(caption = "Predicted probabilities of class membership (sample of 10)") %>%
+head(predictions$class, 10)
+```
+
+We can also visualize the posterior probabilities of class membership.
+
+Let's print the ***POSTERIOR PROBABILITIES FROM THE TEST DATA SET FOR THE FIRST 6 ROW***S:
+
+```{r}
+predictions$posterior[1:6, ] %>% 
+  kbl(caption = "Predicted probabilities of class membership (first 6 rows)") %>%
   kable_classic(full_width = F, html_font = "Cambria")
-# Linear discriminants
+```
+
+We can see, for instance, that observation number 9, 11, 27 and 40 can be pretty easily classified into 1 group, since the probability values are pretty high for a specific group. The test sample number 12 can be classified among the groups "aa" and "ao" since the posterior probabilities of belonging to those groups are pretty similar. Also the classification of the sample number 16 is not so straightforward, but we can still classify it into the class "ao".
+
+We can visualize the LDs values for the test observations:
+
+```{r}
+# Linear discriminants of the first 3 test samples
 head(predictions$x, 3)
 ```
-### Model accuracy
 
-We can compute model accuracy in this wa
+#### Model accuracy
+
+We can compute model accuracy:
+
 ```{r}
 mean(predictions$class==test.data$g)
 ```
-It can be seen that, our model correctly classified `r paste0(round(mean(predictions$class==test.data$g)*100,2),"%")` of observations, which is a quite good result.
 
-### Running QDA
-It assumes that the spread/variance in each variable is different
+It can be seen that, our model correctly classified `r paste0(round(mean(predictions$class==test.data$g)*100,2),"%")` of observations, which is a quite good result, but still we need to compare it with the other methods to draw more reliable conclusion about the goodness of the "vanilla" LDA algorithm.
+
+## Running QDA
+
+It assumes that the spread/variance in each class is different. The implementation relies again on the *MASS* package:
+
 ```{r}
 library(MASS)
 #Fit the model
 (modelqda <- qda(g ~ ., data = train.data))
-# Make predictions
-predictionsqda <- modelqda %>% predict(test.data)
-# Model accuracy
-mean(predictionsqda$class == test.data$g)
 ```
-QDA model correctly classified `r paste0(round(mean(predictionsqda$class == test.data$g)*100,2),"%")` of observations, which is excellent (the same value as before. Small data set).
 
+### Predictions
 
+```{r}
+predictionsqda <- modelqda %>% predict(test.data)
+names(predictionsqda)
+```
 
+Notice that in this case the 'predict' function does not return the DFs coordinates.
 
+Let's inspect the predicted class for the first 10 test samples:
+
+```{r}
+head(predictionsqda$class, 10)
+```
+
+We can also visualize the posterior probabilities of class membership.
+
+Let's print the ***POSTERIOR PROBABILITIES FROM THE TEST DATA SET FOR THE FIRST 6 ROW***S:
+
+```{r}
+predictionsqda$posterior[1:6, ] %>% 
+  kbl(caption = "Predicted probabilities of class membership (first 6 rows)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+We can see, for instance, that observation number 9, 11, 27 and 40 can be pretty easily classified into 1 group, since the probability values are pretty high for a specific group. Now, sample number 12 can be pretty easily classified ("aa" class); the same for what regards the test sample number 16.
+
+Notice that, in this case, we can't visualize the LDs values for the test observations.
+
+### Model accuracy
+
+We can compute model accuracy in this way:
+
+```{r}
+mean(predictionsqda$class==test.data$g)
+```
+
+QDA model correctly classified `r paste0(round(mean(predictionsqda$class == test.data$g)*100,2),"%")` of observations, which is a very small improvement w.r.t. LDA.
+
+The improvement (very small) is due to the fact that QDA is more flexible with respect to LDA, since it doesn't assume equality of variance inside each cluster. We also know that QDA is better for large training sets and, actually, our training set is pretty large.
+
+### Running FDA
+
+```{r}
+library(mda)
+#Fit the model
+(modelfda <- fda(g ~ ., data = train.data))
+```
+
+### Predictions
+
+```{r}
+predictionsfda <- modelfda %>% predict(test.data, type="class")
+```
+
+Let's inspect the predicted class for the first 10 test samples:
+
+```{r}
+head(predictionsfda, 10)
+```
+
+We can also visualize the posterior probabilities of class membership.
+
+Let's print the ***POSTERIOR PROBABILITIES FROM THE TEST DATA SET FOR THE FIRST 6 ROW***S:
+
+```{r}
+predictionsfda <- modelfda %>% predict(test.data, type="posterior")
+predictionsfda[1:6, ] %>% 
+  kbl(caption = "Predicted probabilities of class membership (first 6 rows)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+In this case, we can see that the obtained model has some difficulties in predicting the class of sample number 12 (as happens also on LDA) and, in a smaller extent, also the sample number 16.
+
+### Accuracy
+
+```{r}
+modelfda$confusion
+confusion(modelfda,test.data) %>% #Confusion in the test data 
+  kbl(caption = "Confusion matrix in the test data") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+sum(diag(confusion(modelfda,test.data)))/sum(confusion(modelfda,test.data))
+```
+
+FDA model correctly classified `r paste0(round((sum(diag(confusion(modelfda,test.data)))/sum(confusion(modelfda,test.data)))*100,2),"%")` of observations, which is the same accuracy obtained with LDA.
+
+FDA is useful to model multivariate non-normality or non-linear\
+relationships among variables within each group, but we can see that in our case it doesn't bring any improvement.
+
+## Running RDA
+
+RDA provides a more robust model against collinearity. It may be very useful in data sets containing highly correlated predictors.
+
+```{r}
+library(klaR)
+#Fit the model
+(modelrda <- rda(g ~ ., data = train.data))
+```
+
+### Predictions
+
+```{r}
+# Make predictions
+predictionsrda <- modelrda %>% predict(test.data)
+names(predictionsrda)
+```
+
+Predicted class for the first 10 test samples:
+
+```{r}
+head(predictionsrda$class, 10)
+```
+
+We can also visualize the posterior probabilities of class membership.
+
+Let's print the ***POSTERIOR PROBABILITIES FROM THE TEST DATA SET*** for the first 6 rows:
+
+```{r}
+predictionsrda$posterior[1:6, ] %>% 
+  kbl(caption = "Predicted probabilities of class membership (first 6 rows)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+In this case, we can see that the obtained model struggles in classifying the 3rd and 4th observations.
+
+### Model accuracy
+
+We can compute model accuracy in this way:
+
+```{r}
+mean(predictionsrda$class==test.data$g)
+```
+
+It can be seen that, our model correctly classified `r paste0(round(mean(predictionsrda$class==test.data$g)*100,2),"%")` of observations, which is a the same value as the one obtained also with LDA and FDA, so it is still slightly worse w.r.t. QDA.
+
+RDA is very useful for data sets containing highly correlated predictors, but we can see that in our case it doesn't give any improvement w.r.t. the traditional LDA.
+
+## Running MDA
+
+```{r}
+library(mda)
+#Fit the model
+(modelmda <- mda(g ~ ., data = train.data))
+```
+
+### Predictions
+
+```{r}
+predictionsmda <- modelmda %>% predict(test.data, type="class")
+```
+
+Let's inspect the predicted class for the first 10 test samples:
+
+```{r}
+head(predictionsmda, 10)
+```
+
+We can also visualize the posterior probabilities of class membership.
+
+Let's print the ***POSTERIOR PROBABILITIES FROM THE TEST DATA SET FOR THE FIRST 6 ROWS***:
+
+```{r}
+predictionsmda <- modelmda %>% predict(test.data, type="posterior")
+predictionsmda[1:6, ] %>% 
+  kbl(caption = "Predicted probabilities of class membership (first 6 rows)") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+In this case, we can see that the obtained model is not very confident for what regards the classification of the 1st and 3rd sample.
+
+### Accuracy
+
+```{r}
+modelmda$confusion
+confusion(modelmda,test.data) %>% #Confusion in the test data 
+  kbl(caption = "Confusion matrix in the test data") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+sum(diag(confusion(modelfda,test.data)))/sum(confusion(modelfda,test.data))
+```
+
+MDA model correctly classified `r paste0(round((sum(diag(confusion(modelmda,test.data)))/sum(confusion(modelmda,test.data)))*100,2),"%")` of observations, which is the same accuracy obtained with LDA, FDA and RDA .
+
+MDA is useful when each class can be seen as a Gaussian Mixture of sub-classes. In our case, it doesn't give any improvement w.r.t. the traditional LDA.
+
+## Conclusions
+
+The analyses we performed shows that there is almost no difference among the various techniques we used for performing *discriminant analysis* on the "Phoneme" dataset.
+
+In particular, we obtained our best result with the QDA approach; therefore we may say that, for this dataset, the spread in each class is different and QDA takes advantage of that, allowing to obtain a (very small) improvement w.r.t. LDA and the other considered extensions.

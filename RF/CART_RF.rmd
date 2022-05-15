@@ -189,7 +189,7 @@ paste(mean(pred==Ionosphere.test$Class), bal_accuracy_vec(pred, truth=Ionosphere
 
 
 ### Optimal number of variables
-Now that we have fixed the number of trees, we will try to find the optimal number of variable used in our trees. To do so, we will iterate over a range of variable number and plot the OOB error rate.
+We will try to find the optimal number of variable used in our trees. To do so, we will iterate over a range of variable number and plot the OOB error rate.
 ```{r}
 oob_per_mtry <- function(mtry){
   model = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=500, mtry=mtry)
@@ -215,6 +215,7 @@ pred = predict(rf, Ionosphere.test, type="class")
 table(pred=pred, true=Ionosphere.test$Class)
 paste(mean(pred==Ionosphere.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.test$Class, estimator="binary"))
 ```
+
 
 ### Tree numbers
 ```{r}
@@ -280,21 +281,84 @@ Then compute a new randomForest:
 # To get variables names to sum
 for(v in colnames(Ionosphere.with_norms)[-35]){cat(paste(v,"+ "))}
 ```
-
 ```{r}
-model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train, ntree=3000)
+model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train)
 plot(model_with_norm)
 model_with_norm
 ```
 
 Performances:
 ```{r}
+pred = predict(model_with_norm, Ionosphere.with_norms.test, type="class")
+table(pred=pred, true=Ionosphere.with_norms.test$Class)
+```
+
+```{r}
+paste(mean(pred==Ionosphere.with_norms.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.with_norms.test$Class, estimator="binary"))
+```
+
+
+### Number of variables
+```{r}
+oob_per_mtry <- function(mtry){
+  model = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=500, mtry=mtry)
+  
+  return(model$err.rate[498,1])
+}
+
+mtry_vals = c(1:34)
+oob_vals = lapply(mtry_vals, oob_per_mtry)
+plot(mtry_vals, oob_vals)
+```
+Seems to be optimal for mtry=6
+
+```{r}
+model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train, mtry=6)
+model_with_norm
+```
+
+Performances:
+```{r}
+pred = predict(model_with_norm, Ionosphere.with_norms.test, type="class")
+table(pred=pred, true=Ionosphere.with_norms.test$Class)
+```
+
+```{r}
+paste(mean(pred==Ionosphere.with_norms.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.with_norms.test$Class, estimator="binary"))
+```
+
+### Number of trees
+```{r}
+model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train, mtry=6, ntree=1000)
+plot(model_with_norm)
+model_with_norm
+```
+
+Minimal error seems around 300, we'll recompute to zoom in
+```{r}
+model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train, mtry=6, ntree=500)
+plot(model_with_norm)
+model_with_norm
+```
+Seems optimal for ntrees=100:
+```{r}
+model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train, mtry=6, ntree=100)
+```
+
+
+Performances:
+```{r}
+pred = predict(model_with_norm, Ionosphere.with_norms.test, type="class")
+table(pred=pred, true=Ionosphere.with_norms.test$Class)
+```
+
+```{r}
 paste(mean(pred==Ionosphere.with_norms.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.with_norms.test$Class, estimator="binary"))
 ```
 
 Important features
 ```{r}
-barplot(head(sort(model$importance, decreasing=TRUE)))
+model_with_norm$importance
 ```
 
 

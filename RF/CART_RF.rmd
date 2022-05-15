@@ -6,6 +6,7 @@ output: html_document
 # CART & Random Forest
 ```{r}
 install.packages("yardstick")
+set.seed(67)
 ```
 
 
@@ -92,8 +93,10 @@ fancyRpartPlot(Ionosphere.tree.train)
 ```
 
 
-**Answer b)** Here is the classification tree:
+**Answer b)** Here is the classification tree for a default run:
 ```{r}
+Ionosphere.tree.train = rpart(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, method="class")
+
 fancyRpartPlot(Ionosphere.tree.train, main="Default parameter run")
 ```
 ```{r}
@@ -174,9 +177,45 @@ Now we will compute a random forest in the hope for a better accuracy score, usi
 rf = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train)
 print(rf)
 ```
+
+```{r}
+pred = predict(rf, Ionosphere.test, type="class")
+table(pred=pred, true=Ionosphere.test$Class)
+```
+
 ```{r}
 paste(mean(pred==Ionosphere.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.test$Class, estimator="binary"))
 ```
+
+
+### Optimal number of variables
+Now that we have fixed the number of trees, we will try to find the optimal number of variable used in our trees. To do so, we will iterate over a range of variable number and plot the OOB error rate.
+```{r}
+oob_per_mtry <- function(mtry){
+  model = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=500, mtry=mtry)
+  
+  return(model$err.rate[498,1])
+}
+
+mtry_vals = c(1:34)
+oob_vals = lapply(mtry_vals, oob_per_mtry)
+plot(mtry_vals, oob_vals)
+```
+
+On the above plot we can see that the OOB error seems to be reaching a global minimum around 7 variables. However, we have to take into consideration that those result we obtained one set of train/test split and parameters may differ for different simulations.
+
+We'll then recompute our Random Forest model with this *mtry* paramter:
+```{r}
+model = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=500, mtry=10)
+print(rf)
+```
+
+```{r}
+pred = predict(rf, Ionosphere.test, type="class")
+table(pred=pred, true=Ionosphere.test$Class)
+paste(mean(pred==Ionosphere.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.test$Class, estimator="binary"))
+```
+
 ### Tree numbers
 ```{r}
 plot(rf, main="Random forest")
@@ -199,33 +238,6 @@ We still have a more "good" values that were supposed to be classified as "bad" 
 ```{r}
 paste(mean(pred==Ionosphere.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.test$Class, estimator="binary"))
 ```
-
-### Optimal number of variables
-Now that we have fixed the number of trees, we will try to find the optimal number of variable used in our trees. To do so, we will iterate over a range of variable number and plot the OOB error rate.
-```{r}
-oob_per_mtry <- function(mtry){
-  model = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=1000, mtry=mtry)
-  
-  return(model$err.rate[998,1])
-}
-
-mtry_vals = c(1:34)
-oob_vals = lapply(mtry_vals, oob_per_mtry)
-plot(mtry_vals, oob_vals)
-```
-
-On the above plot we can see that the OOB error seems to be reaching a global minimum around 7 variables. However, we have to take into consideration that those result we obtained one set of train/test split and parameters may differ for different simulations.
-
-We'll then recompute our Random Forest model with this *mtry* paramter:
-```{r}
-model = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34, data = Ionosphere.train, ntree=130, mtry=16)
-print(rf)
-```
-
-```{r}
-paste(mean(pred==Ionosphere.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.test$Class, estimator="binary"))
-```
-
 
 ## Going further with this model with feature engineering
 From a purely physical point of view, we could also take into account the norm of the electromagnetic field into consideration to state whether a signal is "good" or "bad". Therefore, we'll add the norm of each couple of measurement (real and complex values) and study its influence on the Random Forest performances.
@@ -252,7 +264,6 @@ We reapply the train/test separation:
 ```{r}
 library(caret)
 
-set.seed(67)
 train_samples <- Ionosphere.with_norms$Class %>% # return the indexes of the rows
       createDataPartition(p = 0.8, list = FALSE)
 
@@ -271,20 +282,19 @@ for(v in colnames(Ionosphere.with_norms)[-35]){cat(paste(v,"+ "))}
 ```
 
 ```{r}
-model_with_norm = randomForest(formula = Class ~ N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train)
+model_with_norm = randomForest(formula = Class ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V33 + V34 + N1 + N2 + N3 + N4 + N5 + N6 + N7 + N8 + N9 + N10 + N11 + N12 + N13 + N14 + N15 + N16, data = Ionosphere.with_norms.train, ntree=3000)
 plot(model_with_norm)
 model_with_norm
 ```
-
 
 Performances:
 ```{r}
 paste(mean(pred==Ionosphere.with_norms.test$Class), bal_accuracy_vec(pred, truth=Ionosphere.with_norms.test$Class, estimator="binary"))
 ```
 
+Important features
 ```{r}
-install.packages("ggcorrplot")
-library(ggcorrplot)
-ggcorrplot(Ionosphere.with_norms[3:6])
+barplot(head(sort(model$importance, decreasing=TRUE)))
 ```
+
 
